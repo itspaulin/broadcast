@@ -9,10 +9,13 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "emulators": "firebase emulators:start --only auth,firestore,functions --import .emulator-data --export-on-exit",
-    "dev": "npm run build -w functions && concurrently -k -n functions,emulators,web -c blue,magenta,green \"npm run build:watch -w functions\" \"npm run emulators\" \"npm run dev -w web\""
+    "dev": "npm run build -w functions && concurrently -k -n functions,emulators,web -c blue,magenta,green \"npm run build:watch -w functions\" \"npm run emulators\" \"npm run dev -w web\"",
+    "lint": "oxlint --deny-warnings",
+    "build": "npm run build --workspaces --if-present"
   },
   "devDependencies": {
     "concurrently": "^10.0.5",
-    "firebase-tools": "^15.32.0"
+    "firebase-tools": "^15.32.0",
+    "oxlint": "^1.86.0"
   }
 }
