@@ -1,8 +1,18 @@
 {
   "name": "broadcast",
   "private": true,
-  "workspaces": ["shared", "web", "functions"],
+  "workspaces": [
+    "shared",
+    "web",
+    "functions"
+  ],
   "scripts": {
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "emulators": "firebase emulators:start --only auth,firestore,functions --import .emulator-data --export-on-exit",
+    "dev": "npm run build -w functions && concurrently -k -n functions,emulators,web -c blue,magenta,green \"npm run build:watch -w functions\" \"npm run emulators\" \"npm run dev -w web\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5",
+    "firebase-tools": "^15.32.0"
   }
 }

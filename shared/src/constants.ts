@@ -6,6 +6,8 @@ export const COLLECTIONS = {
   messageRevisions: 'messageRevisions',
 } as const
 
+export const FUNCTIONS_REGION = 'southamerica-east1'
+
 export const NAME_MAX_LENGTH = 80
 export const MESSAGE_BODY_MAX_LENGTH = 4096
 
