@@ -3,6 +3,7 @@ import { GuestOnly, RequireAuth } from '../features/auth/guards'
 import { LoginPage } from '../features/auth/LoginPage'
 import { SignUpPage } from '../features/auth/SignUpPage'
 import { ConnectionPage } from '../features/connections/ConnectionPage'
+import { ContactsPage } from '../features/contacts/ContactsPage'
 import { Placeholder } from '../components/Placeholder'
 import { AppLayout } from './AppLayout'
 
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
             element: <ConnectionPage />,
             children: [
               { index: true, element: <Navigate to="contacts" replace /> },
-              { path: 'contacts', element: <Placeholder>Contatos em breve.</Placeholder> },
+              { path: 'contacts', element: <ContactsPage /> },
               { path: 'broadcast', element: <Placeholder>Broadcast em breve.</Placeholder> },
             ],
           },
