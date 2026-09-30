@@ -4,3 +4,5 @@ import { setGlobalOptions } from 'firebase-functions/v2'
 
 initializeApp()
 setGlobalOptions({ region: FUNCTIONS_REGION, maxInstances: 10 })
+
+export { onUserCreated } from './auth/onUserCreated.ts'
