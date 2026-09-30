@@ -1,8 +1,9 @@
-import { Typography } from '@mui/material'
 import { createBrowserRouter, Navigate } from 'react-router'
 import { GuestOnly, RequireAuth } from '../features/auth/guards'
 import { LoginPage } from '../features/auth/LoginPage'
 import { SignUpPage } from '../features/auth/SignUpPage'
+import { ConnectionPage } from '../features/connections/ConnectionPage'
+import { Placeholder } from '../components/Placeholder'
 import { AppLayout } from './AppLayout'
 
 export const router = createBrowserRouter([
@@ -19,13 +20,15 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
+          { index: true, element: <Placeholder>Selecione ou crie uma conexão.</Placeholder> },
           {
-            index: true,
-            element: (
-              <Typography className="p-6" color="text.secondary">
-                Selecione ou crie uma conexão.
-              </Typography>
-            ),
+            path: 'connections/:connectionId',
+            element: <ConnectionPage />,
+            children: [
+              { index: true, element: <Navigate to="contacts" replace /> },
+              { path: 'contacts', element: <Placeholder>Contatos em breve.</Placeholder> },
+              { path: 'broadcast', element: <Placeholder>Broadcast em breve.</Placeholder> },
+            ],
           },
         ],
       },
