@@ -62,6 +62,7 @@ Com `VITE_USE_EMULATORS=true` em `web/.env`, o front usa os emuladores; com `fal
 | `npm run typecheck` | Typecheck de `shared`, `web` e `functions` |
 | `npm run lint`      | oxlint em todo o repo (warnings falham)     |
 | `npm run build`     | Build de `web` e `functions`                |
+| `npm run test:rules` | Testes das Security Rules no emulador do Firestore |
 
 ## Deploy
 
