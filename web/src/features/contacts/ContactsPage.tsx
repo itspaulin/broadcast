@@ -1,5 +1,6 @@
 import type { Contact, WithId } from '@broadcast/shared'
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import {
   Alert,
@@ -17,6 +18,7 @@ import { formatPhone, plural } from '../../lib/format'
 import { useCurrentUser } from '../auth/authContext'
 import { useConnection } from '../connections/connectionContext'
 import { ContactDialog } from './ContactDialog'
+import { DeleteContactDialog } from './DeleteContactDialog'
 import { useContacts } from './contactsService'
 
 type DialogState = { open: boolean; contact?: WithId<Contact> }
@@ -26,6 +28,7 @@ export const ContactsPage = () => {
   const connection = useConnection()
   const { data: contacts, loading, error } = useContacts(user.uid, connection.id)
   const [editing, setEditing] = useState<DialogState>({ open: false })
+  const [deleting, setDeleting] = useState<DialogState>({ open: false })
 
   return (
     <section aria-label="Contatos" className="flex max-w-3xl flex-col gap-4">
@@ -64,14 +67,23 @@ export const ContactsPage = () => {
               <ListItem
                 key={contact.id}
                 divider={index < contacts.length - 1}
+                className="pr-28"
                 secondaryAction={
-                  <IconButton
-                    edge="end"
-                    aria-label={`Editar ${contact.name}`}
-                    onClick={() => setEditing({ open: true, contact })}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
+                  <div className="flex gap-1">
+                    <IconButton
+                      aria-label={`Editar ${contact.name}`}
+                      onClick={() => setEditing({ open: true, contact })}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label={`Excluir ${contact.name}`}
+                      onClick={() => setDeleting({ open: true, contact })}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </div>
                 }
               >
                 <ListItemText primary={contact.name} secondary={formatPhone(contact.phone)} />
@@ -85,6 +97,11 @@ export const ContactsPage = () => {
         open={editing.open}
         contact={editing.contact}
         onClose={() => setEditing((current) => ({ ...current, open: false }))}
+      />
+      <DeleteContactDialog
+        open={deleting.open}
+        contact={deleting.contact}
+        onClose={() => setDeleting((current) => ({ ...current, open: false }))}
       />
     </section>
   )

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { MESSAGE_BODY_MAX_LENGTH, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from './constants.ts'
 
-const id = z.string().min(1)
+const id = z.string({ error: 'Identificador inválido' }).min(1, 'Identificador inválido')
 
 const name = z.string().trim().min(1, 'Informe o nome').max(NAME_MAX_LENGTH)
 
@@ -72,3 +72,4 @@ export type DeleteContactInput = z.infer<typeof deleteContactInputSchema>
 export type DeleteConnectionInput = z.infer<typeof deleteConnectionInputSchema>
 
 export type DeleteConnectionResult = { contacts: number; messages: number }
+export type DeleteContactResult = { updatedMessages: number; deletedMessages: number }

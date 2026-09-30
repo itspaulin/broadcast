@@ -2,10 +2,7 @@ import { COLLECTIONS, deleteConnectionInputSchema, type DeleteConnectionResult }
 import { getFirestore, type Firestore } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { parseInput, requireClientId } from '../lib/callable.ts'
-import { chunk, deleteInBatches } from '../lib/firestore.ts'
-
-// Firestore limit for values in an `in` filter.
-const IN_FILTER_LIMIT = 30
+import { chunk, deleteInBatches, IN_FILTER_LIMIT } from '../lib/firestore.ts'
 
 const findRevisionRefs = async (db: Firestore, clientId: string, messageIds: string[]) => {
   const snapshots = await Promise.all(
