@@ -16,6 +16,7 @@ O envio de mensagens é simulado; mensagens agendadas passam para **Enviada** au
 
 ```
 .
+├── docs/decisions/       # ADRs
 ├── functions/            # Cloud Functions
 ├── shared/               # Tipos, schemas zod e regras de domínio (web + functions)
 ├── web/                  # Frontend (Vite)
@@ -24,25 +25,15 @@ O envio de mensagens é simulado; mensagens agendadas passam para **Enviada** au
 └── firestore.indexes.json
 ```
 
-## Modelagem de dados
+## Modelagem e isolamento
 
-Sem subcoleções: todas as coleções ficam na raiz e cada documento carrega `clientId` (= `uid` do Firebase Auth).
+Sem subcoleções: todas as coleções ficam na raiz (`clients`, `connections`, `contacts`, `messages`, `messageRevisions`) e cada documento carrega `clientId` (= `uid` do Firebase Auth).
 
-| Coleção       | Campos principais                                                                              |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| `clients`     | `{uid}` → `name`, `email`, `createdAt`                                                        |
-| `connections` | `clientId`, `name`, `createdAt`, `updatedAt`                                                   |
-| `contacts`    | `clientId`, `connectionId`, `name`, `phone`, `createdAt`, `updatedAt`                          |
-| `messages`    | `clientId`, `connectionId`, `contactIds[]`, `body`, `status` (`scheduled` \| `sent`), `scheduledAt`, `sentAt` |
+- As Security Rules só autorizam leitura e escrita quando `clientId == request.auth.uid`; toda query do front filtra por `clientId`.
+- Conexões e contatos são escritos pelo front e validados pelas rules.
+- Mensagens são lidas em tempo real pelo front, mas criadas, editadas e excluídas só por Cloud Functions (callables), que controlam status, destinatários e histórico.
 
-## Isolamento entre clientes
-
-Garantido pelas Security Rules do Firestore:
-
-- Leitura e escrita somente quando `resource.data.clientId == request.auth.uid`;
-- `clientId` e `connectionId` imutáveis após a criação;
-- Criação de contatos e mensagens valida que a conexão referenciada pertence ao mesmo cliente;
-- Toda query do frontend filtra por `clientId`, o que permite às rules autorizá-la.
+Detalhes, alternativas e consequências: [ADR 0001](docs/decisions/0001-modelagem-e-isolamento.md).
 
 ## Agendamento
 
