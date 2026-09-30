@@ -1,7 +1,9 @@
-import { Typography } from '@mui/material'
+import { RouterProvider } from 'react-router'
+import { AuthProvider } from '../features/auth/AuthProvider'
+import { router } from './router'
 
 export const App = () => (
-  <main className="flex min-h-screen items-center justify-center">
-    <Typography variant="h4">Broadcast</Typography>
-  </main>
+  <AuthProvider>
+    <RouterProvider router={router} />
+  </AuthProvider>
 )

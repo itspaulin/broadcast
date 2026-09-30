@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MESSAGE_BODY_MAX_LENGTH, NAME_MAX_LENGTH } from './constants.ts'
+import { MESSAGE_BODY_MAX_LENGTH, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from './constants.ts'
 
 const id = z.string().min(1)
 
@@ -24,6 +24,19 @@ const contactIds = z
 
 const scheduledAt = z.number().int().positive().nullable()
 
+const email = z.string().trim().pipe(z.email('E-mail inválido'))
+
+export const signInInputSchema = z.object({
+  email,
+  password: z.string().min(1, 'Informe a senha'),
+})
+
+export const signUpInputSchema = z.object({
+  name,
+  email,
+  password: z.string().min(PASSWORD_MIN_LENGTH, `A senha deve ter ao menos ${PASSWORD_MIN_LENGTH} caracteres`),
+})
+
 export const connectionInputSchema = z.object({ name })
 
 export const contactInputSchema = z.object({ name, phone })
@@ -46,6 +59,8 @@ export const deleteMessageInputSchema = z.object({ messageId: id })
 
 export const deleteContactInputSchema = z.object({ contactId: id })
 
+export type SignInInput = z.infer<typeof signInInputSchema>
+export type SignUpInput = z.infer<typeof signUpInputSchema>
 export type ConnectionInput = z.infer<typeof connectionInputSchema>
 export type ContactInput = z.infer<typeof contactInputSchema>
 export type CreateMessageInput = z.infer<typeof createMessageInputSchema>
