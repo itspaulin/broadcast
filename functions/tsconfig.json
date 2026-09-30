@@ -3,13 +3,12 @@
     "target": "es2022",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "outDir": "lib",
-    "rootDir": "src",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "strict": true,
-    "sourceMap": true,
     "skipLibCheck": true,
     "noUnusedLocals": true,
     "esModuleInterop": true
   },
-  "include": ["src"]
+  "include": ["src", "tsup.config.ts"]
 }
