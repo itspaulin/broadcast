@@ -1,5 +1,7 @@
 # Broadcast
 
+[![CI](https://github.com/itspaulin/broadcast/actions/workflows/ci.yml/badge.svg)](https://github.com/itspaulin/broadcast/actions/workflows/ci.yml)
+
 Aplicação SaaS multi-tenant de Broadcast (teste prático — Desenvolvedor Full Stack).
 Cada usuário cadastrado é um cliente, com suas próprias conexões, contatos e mensagens.
 O envio de mensagens é simulado; mensagens agendadas passam para **Enviada** automaticamente via Cloud Functions.
@@ -67,6 +69,8 @@ Com `VITE_USE_EMULATORS=true` em `web/.env`, o front usa os emuladores; com `fal
 | `npm run dev`       | Functions (watch) + emuladores + web        |
 | `npm run emulators` | Apenas os emuladores                        |
 | `npm run typecheck` | Typecheck de `shared`, `web` e `functions` |
+| `npm run lint`      | oxlint em todo o repo (warnings falham)     |
+| `npm run build`     | Build de `web` e `functions`                |
 
 ## Deploy
 
