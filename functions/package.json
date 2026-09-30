@@ -7,8 +7,8 @@
     "node": "22"
   },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build": "tsup",
+    "build:watch": "tsup --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
@@ -19,6 +19,7 @@
     "firebase-functions": "^7.4.0"
   },
   "devDependencies": {
+    "tsup": "^8.5.1",
     "typescript": "^7.0.2"
   }
 }
