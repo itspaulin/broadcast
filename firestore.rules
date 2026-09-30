@@ -2,8 +2,85 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.clientId == request.auth.uid;
+    }
+
+    function hasExactly(keys) {
+      return request.resource.data.keys().hasAll(keys)
+        && request.resource.data.keys().hasOnly(keys);
+    }
+
+    function changesOnly(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    // Keep in sync with NAME_MAX_LENGTH and the phone schema in /shared.
+    function isValidName(value) {
+      return value is string && value.size() > 0 && value.size() <= 80 && value.trim() == value;
+    }
+
+    function isValidPhone(value) {
+      return value is string && value.matches('^[+]55[0-9]{10,11}$');
+    }
+
+    function ownsConnection(connectionId) {
+      let path = /databases/$(database)/documents/connections/$(connectionId);
+      return connectionId is string && exists(path) && get(path).data.clientId == request.auth.uid;
+    }
+
+    // The document itself is created by the Auth trigger; the client only fills in its name.
+    match /clients/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn() && request.auth.uid == uid
+        && hasExactly(['name'])
+        && isValidName(request.resource.data.name);
+      allow update: if isSignedIn() && request.auth.uid == uid
+        && changesOnly(['name'])
+        && isValidName(request.resource.data.name);
+    }
+
+    match /connections/{connectionId} {
+      allow read: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data)
+        && hasExactly(['clientId', 'name', 'createdAt', 'updatedAt'])
+        && isValidName(request.resource.data.name)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(resource.data)
+        && changesOnly(['name', 'updatedAt'])
+        && isValidName(request.resource.data.name)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /contacts/{contactId} {
+      allow read: if isOwner(resource.data);
+      allow create: if isOwner(request.resource.data)
+        && hasExactly(['clientId', 'connectionId', 'name', 'phone', 'createdAt', 'updatedAt'])
+        && ownsConnection(request.resource.data.connectionId)
+        && isValidName(request.resource.data.name)
+        && isValidPhone(request.resource.data.phone)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if isOwner(resource.data)
+        && changesOnly(['name', 'phone', 'updatedAt'])
+        && isValidName(request.resource.data.name)
+        && isValidPhone(request.resource.data.phone)
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // Written only by Cloud Functions (Admin SDK bypasses rules).
+    match /messages/{messageId} {
+      allow read: if isOwner(resource.data);
+    }
+
+    match /messageRevisions/{revisionId} {
+      allow read: if isOwner(resource.data);
     }
   }
 }
