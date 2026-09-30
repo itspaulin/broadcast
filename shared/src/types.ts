@@ -14,10 +14,12 @@ type Owned = {
   updatedAt: Timestamp
 }
 
+// Written by both the Auth trigger (email, createdAt) and the sign-up form (name),
+// in either order, so any field may be briefly missing.
 export type Client = {
-  name: string
-  email: string
-  createdAt: Timestamp
+  name?: string
+  email?: string
+  createdAt?: Timestamp
 }
 
 export type Connection = Owned & {

@@ -9,6 +9,7 @@ export const COLLECTIONS = {
 export const FUNCTIONS_REGION = 'southamerica-east1'
 
 export const NAME_MAX_LENGTH = 80
+export const PASSWORD_MIN_LENGTH = 6
 export const MESSAGE_BODY_MAX_LENGTH = 4096
 
 export const EDIT_WINDOW_MS = 15 * 60 * 1000
