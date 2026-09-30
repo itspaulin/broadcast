@@ -1,0 +1,16 @@
+{
+  "name": "tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:rules": "firebase emulators:exec --only firestore \"vitest run rules\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "@types/node": "^24.19.0",
+    "firebase": "^12.19.0",
+    "typescript": "~6.0.2",
+    "vitest": "^5.0.3"
+  }
+}
