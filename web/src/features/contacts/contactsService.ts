@@ -1,7 +1,15 @@
-import { COLLECTIONS, type Contact, type ContactInput } from '@broadcast/shared'
-import { addDoc, collection, doc, query, serverTimestamp, updateDoc, where } from 'firebase/firestore'
+import {
+  COLLECTIONS,
+  type Contact,
+  type ContactInput,
+  type DeleteContactInput,
+  type DeleteContactResult,
+  type Message,
+} from '@broadcast/shared'
+import { addDoc, collection, doc, getDocs, query, serverTimestamp, updateDoc, where } from 'firebase/firestore'
+import { httpsCallable } from 'firebase/functions'
 import { useMemo } from 'react'
-import { db } from '../../lib/firebase'
+import { db, functions } from '../../lib/firebase'
 import { useQueryData } from '../../lib/firestoreHooks'
 
 const contacts = collection(db, COLLECTIONS.contacts)
@@ -11,6 +19,22 @@ export const createContact = (clientId: string, connectionId: string, { name, ph
 
 export const updateContact = (contactId: string, { name, phone }: ContactInput) =>
   updateDoc(doc(contacts, contactId), { name, phone, updatedAt: serverTimestamp() })
+
+export const findScheduledMessagesWith = async (clientId: string, contactId: string) => {
+  const snapshot = await getDocs(
+    query(
+      collection(db, COLLECTIONS.messages),
+      where('clientId', '==', clientId),
+      where('status', '==', 'scheduled'),
+      where('contactIds', 'array-contains', contactId),
+    ),
+  )
+  return snapshot.docs.map((item) => item.data() as Message)
+}
+
+const deleteContactCallable = httpsCallable<DeleteContactInput, DeleteContactResult>(functions, 'deleteContact')
+
+export const deleteContact = async (contactId: string) => (await deleteContactCallable({ contactId })).data
 
 const byName = new Intl.Collator('pt-BR', { sensitivity: 'base' })
 

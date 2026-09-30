@@ -1,6 +1,9 @@
 import { WRITE_BATCH_LIMIT } from '@broadcast/shared'
 import type { DocumentReference, Firestore } from 'firebase-admin/firestore'
 
+// Firestore limit for values in an `in` filter.
+export const IN_FILTER_LIMIT = 30
+
 // Plain batches instead of BulkWriter: a failed write rejects here and reaches the caller,
 // while BulkWriter only reports failures through a callback.
 export const deleteInBatches = async (db: Firestore, refs: DocumentReference[]) => {
