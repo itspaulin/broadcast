@@ -15,6 +15,7 @@ O envio de mensagens é simulado; mensagens agendadas passam para **Enviada** au
 ```
 .
 ├── functions/            # Cloud Functions
+├── shared/               # Tipos, schemas zod e regras de domínio (web + functions)
 ├── web/                  # Frontend (Vite)
 ├── firebase.json
 ├── firestore.rules       # Isolamento entre clientes
@@ -48,25 +49,28 @@ Requer o plano **Blaze** do Firebase.
 
 ## Rodando localmente
 
-Pré-requisitos: Node 22+, Firebase CLI (`npm i -g firebase-tools`).
+Pré-requisitos: Node 22+ e JDK 21+ (exigido pelos emuladores do Firebase). A Firebase CLI vem como dependência do projeto.
 
 ```bash
-npm --prefix web install
-npm --prefix functions install
-
+npm install
 cp web/.env.example web/.env   # preencher com as credenciais do app web do Firebase
-
-npm --prefix functions run build
-firebase emulators:start
-
-npm --prefix web run dev
+npm run dev
 ```
 
-Para usar os emuladores, defina `VITE_USE_EMULATORS=true` em `web/.env`.
+`npm run dev` sobe juntos o build em watch das functions, os emuladores (Auth, Firestore, Functions) e o Vite.
+Os dados dos emuladores são persistidos em `.emulator-data/` ao encerrar.
+
+Com `VITE_USE_EMULATORS=true` em `web/.env`, o front usa os emuladores; com `false`, o projeto real.
+
+| Script              | O que faz                                   |
+| ------------------- | ------------------------------------------- |
+| `npm run dev`       | Functions (watch) + emuladores + web        |
+| `npm run emulators` | Apenas os emuladores                        |
+| `npm run typecheck` | Typecheck de `shared`, `web` e `functions` |
 
 ## Deploy
 
 ```bash
-firebase use <project-id>
-firebase deploy
+npx firebase login
+npx firebase deploy
 ```
