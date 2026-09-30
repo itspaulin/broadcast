@@ -1,0 +1,8 @@
+{
+  "name": "broadcast",
+  "private": true,
+  "workspaces": ["shared", "web", "functions"],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}
