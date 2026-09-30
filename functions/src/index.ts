@@ -1,8 +1,6 @@
-import { FUNCTIONS_REGION } from '@broadcast/shared'
-import { initializeApp } from 'firebase-admin/app'
-import { setGlobalOptions } from 'firebase-functions/v2'
-
-initializeApp()
-setGlobalOptions({ region: FUNCTIONS_REGION, maxInstances: 10 })
+// Imported first: ES modules evaluate imports in order, and v2 functions read the global
+// options (region) when they are defined, not when they run.
+import './setup.ts'
 
 export { onUserCreated } from './auth/onUserCreated.ts'
+export { deleteConnection } from './connections/deleteConnection.ts'

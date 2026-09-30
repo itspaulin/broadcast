@@ -1,6 +1,8 @@
 import type { Connection, WithId } from '@broadcast/shared'
 import AddIcon from '@mui/icons-material/Add'
+import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import {
   Alert,
   Button,
@@ -8,7 +10,10 @@ import {
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Skeleton,
   Typography,
 } from '@mui/material'
@@ -17,13 +22,25 @@ import { NavLink } from 'react-router'
 import { useCurrentUser } from '../auth/authContext'
 import { ConnectionDialog } from './ConnectionDialog'
 import { useConnections } from './connectionsService'
+import { DeleteConnectionDialog } from './DeleteConnectionDialog'
 
-type DialogState = { open: false } | { open: true; connection?: WithId<Connection> }
+// Dialogs keep their target after closing so the exit animation does not flash empty content.
+type DialogState = { open: boolean; connection?: WithId<Connection> }
+type MenuState = { anchor: HTMLElement; connection: WithId<Connection> } | null
 
 export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
   const user = useCurrentUser()
   const { data: connections, loading, error } = useConnections(user.uid)
-  const [dialog, setDialog] = useState<DialogState>({ open: false })
+  const [menu, setMenu] = useState<MenuState>(null)
+  const [editing, setEditing] = useState<DialogState>({ open: false })
+  const [deleting, setDeleting] = useState<DialogState>({ open: false })
+
+  const openFromMenu = (action: 'edit' | 'delete') => {
+    if (!menu) return
+    if (action === 'edit') setEditing({ open: true, connection: menu.connection })
+    else setDeleting({ open: true, connection: menu.connection })
+    setMenu(null)
+  }
 
   return (
     <nav aria-label="Conexões" className="flex flex-col gap-2 py-4">
@@ -31,7 +48,7 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
         <Typography variant="overline" color="text.secondary">
           Conexões
         </Typography>
-        <Button size="small" startIcon={<AddIcon />} onClick={() => setDialog({ open: true })}>
+        <Button size="small" startIcon={<AddIcon />} onClick={() => setEditing({ open: true })}>
           Nova
         </Button>
       </div>
@@ -64,10 +81,10 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
               <IconButton
                 edge="end"
                 size="small"
-                aria-label={`Renomear ${connection.name}`}
-                onClick={() => setDialog({ open: true, connection })}
+                aria-label={`Ações de ${connection.name}`}
+                onClick={(event) => setMenu({ anchor: event.currentTarget, connection })}
               >
-                <EditIcon fontSize="small" />
+                <MoreVertIcon fontSize="small" />
               </IconButton>
             }
           >
@@ -83,11 +100,31 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
         ))}
       </List>
 
+      <Menu anchorEl={menu?.anchor} open={menu !== null} onClose={() => setMenu(null)}>
+        <MenuItem onClick={() => openFromMenu('edit')}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Renomear
+        </MenuItem>
+        <MenuItem onClick={() => openFromMenu('delete')} className="text-red-700">
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          Excluir
+        </MenuItem>
+      </Menu>
+
       <ConnectionDialog
-        open={dialog.open}
-        connection={dialog.open ? dialog.connection : undefined}
-        onClose={() => setDialog({ open: false })}
+        open={editing.open}
+        connection={editing.connection}
+        onClose={() => setEditing((current) => ({ ...current, open: false }))}
         onCreated={onNavigate}
+      />
+      <DeleteConnectionDialog
+        open={deleting.open}
+        connection={deleting.connection}
+        onClose={() => setDeleting((current) => ({ ...current, open: false }))}
       />
     </nav>
   )

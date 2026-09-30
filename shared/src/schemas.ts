@@ -59,6 +59,8 @@ export const deleteMessageInputSchema = z.object({ messageId: id })
 
 export const deleteContactInputSchema = z.object({ contactId: id })
 
+export const deleteConnectionInputSchema = z.object({ connectionId: id })
+
 export type SignInInput = z.infer<typeof signInInputSchema>
 export type SignUpInput = z.infer<typeof signUpInputSchema>
 export type ConnectionInput = z.infer<typeof connectionInputSchema>
@@ -67,3 +69,6 @@ export type CreateMessageInput = z.infer<typeof createMessageInputSchema>
 export type UpdateMessageInput = z.infer<typeof updateMessageInputSchema>
 export type DeleteMessageInput = z.infer<typeof deleteMessageInputSchema>
 export type DeleteContactInput = z.infer<typeof deleteContactInputSchema>
+export type DeleteConnectionInput = z.infer<typeof deleteConnectionInputSchema>
+
+export type DeleteConnectionResult = { contacts: number; messages: number }
