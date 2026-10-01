@@ -1,8 +1,5 @@
 import type { Connection, WithId } from '@broadcast/shared'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import {
   Alert,
   Button,
@@ -48,7 +45,7 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
         <Typography variant="overline" color="text.secondary">
           Conexões
         </Typography>
-        <Button size="small" startIcon={<AddIcon />} onClick={() => setEditing({ open: true })}>
+        <Button size="small" startIcon={<Plus size={16} />} onClick={() => setEditing({ open: true })}>
           Nova
         </Button>
       </div>
@@ -84,7 +81,7 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
                 aria-label={`Ações de ${connection.name}`}
                 onClick={(event) => setMenu({ anchor: event.currentTarget, connection })}
               >
-                <MoreVertIcon fontSize="small" />
+                <EllipsisVertical size={18} />
               </IconButton>
             }
           >
@@ -92,7 +89,7 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
               component={NavLink}
               to={`/connections/${connection.id}`}
               onClick={onNavigate}
-              className="aria-[current=page]:bg-blue-50 aria-[current=page]:text-blue-800"
+              className="aria-[current=page]:bg-(--mui-palette-text-primary) aria-[current=page]:text-(--mui-palette-background-default)"
             >
               <ListItemText primary={connection.name} slotProps={{ primary: { noWrap: true } }} />
             </ListItemButton>
@@ -103,13 +100,13 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
       <Menu anchorEl={menu?.anchor} open={menu !== null} onClose={() => setMenu(null)}>
         <MenuItem onClick={() => openFromMenu('edit')}>
           <ListItemIcon>
-            <EditIcon fontSize="small" />
+            <Pencil size={16} />
           </ListItemIcon>
           Renomear
         </MenuItem>
-        <MenuItem onClick={() => openFromMenu('delete')} className="text-red-700">
+        <MenuItem onClick={() => openFromMenu('delete')} className="text-(--mui-palette-error-main)">
           <ListItemIcon>
-            <DeleteIcon fontSize="small" color="error" />
+            <Trash2 size={16} />
           </ListItemIcon>
           Excluir
         </MenuItem>
