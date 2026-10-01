@@ -104,6 +104,24 @@ export const theme = createTheme(
         },
       },
       MuiPaper: { defaultProps: { elevation: 0, square: true } },
+      // Segmented control: square cells sharing borders, the selected one filled with the accent.
+      MuiToggleButton: {
+        styleOverrides: {
+          root: {
+            minHeight: 36,
+            padding: '8px 12px',
+            fontSize: 13,
+            fontWeight: 400,
+            lineHeight: 1.2,
+            textTransform: 'none',
+            color: ink,
+            borderColor: divider,
+            '&:hover': { backgroundColor: inkTint(7) },
+            '&.Mui-selected, &.Mui-selected:hover': { backgroundColor: accent[500], color: ground },
+            '@media (max-width:899px)': { minHeight: 44 },
+          },
+        },
+      },
       MuiMenu: { styleOverrides: { paper: { boxShadow: shadow.md, minWidth: 200 } } },
       MuiMenuItem: {
         styleOverrides: {
