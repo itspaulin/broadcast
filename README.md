@@ -114,12 +114,31 @@ Com `VITE_USE_EMULATORS=true` em `web/.env`, o front usa os emuladores; com `fal
 | ------------------- | ------------------------------------------- |
 | `npm run dev`       | Functions (watch) + emuladores + web        |
 | `npm run emulators` | Apenas os emuladores                        |
+| `npm run seed`      | Cria as contas de demonstração              |
 | `npm run typecheck` | Typecheck de `shared`, `web` e `functions` |
 | `npm run lint`      | oxlint em todo o repo (warnings falham)     |
 | `npm run build`     | Build de `web` e `functions`                |
 | `npm run test:unit` | Testes unitários das regras de domínio (`shared`) e das funções puras do front |
 | `npm run test:rules` | Testes das Security Rules no emulador do Firestore |
 | `npm run test:functions` | Testes das callables e do agendador nos emuladores (Auth, Firestore, Functions) |
+
+## Contas de demonstração
+
+`npm run seed` cria duas contas com conexões, contatos e mensagens (enviadas e agendadas):
+
+| Cliente | E-mail | Senha |
+| ------- | ------ | ----- |
+| Padaria Pão Quente | `demo@broadcast.dev` | `demo123` |
+| Studio Fit | `demo2@broadcast.dev` | `demo123` |
+
+São dois clientes para mostrar o isolamento: cada um só enxerga os próprios dados.
+
+O script usa o SDK web, como um usuário faria: cadastra a conta, grava conexões e contatos passando pelas Security Rules e cria as mensagens pelas callables. Não precisa de credencial de administrador e não duplica dados se for executado de novo.
+
+```bash
+npm run seed                  # emuladores (com `npm run dev` rodando)
+npm run seed -- --production  # projeto real configurado em web/.env
+```
 
 ## Deploy
 
