@@ -5,7 +5,7 @@ import { SignUpPage } from '../features/auth/SignUpPage'
 import { ConnectionPage } from '../features/connections/ConnectionPage'
 import { ConnectionsHome } from '../features/connections/ConnectionsHome'
 import { ContactsPage } from '../features/contacts/ContactsPage'
-import { Placeholder } from '../components/Placeholder'
+import { BroadcastPage } from '../features/messages/BroadcastPage'
 import { AppLayout } from './AppLayout'
 
 export const router = createBrowserRouter([
@@ -29,7 +29,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="contacts" replace /> },
               { path: 'contacts', element: <ContactsPage /> },
-              { path: 'broadcast', element: <Placeholder>Broadcast em breve.</Placeholder> },
+              { path: 'broadcast', element: <BroadcastPage /> },
             ],
           },
         ],
