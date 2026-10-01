@@ -1,8 +1,8 @@
 import type { Connection, WithId } from '@broadcast/shared'
-import { EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import {
   Alert,
   Button,
+  Divider,
   IconButton,
   List,
   ListItem,
@@ -14,20 +14,28 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material'
+import { EllipsisVertical, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { NavLink } from 'react-router'
-import { useCurrentUser } from '../auth/authContext'
+import { NavLink, useParams } from 'react-router'
 import { ConnectionDialog } from './ConnectionDialog'
-import { useConnections } from './connectionsService'
 import { DeleteConnectionDialog } from './DeleteConnectionDialog'
 
 // Dialogs keep their target after closing so the exit animation does not flash empty content.
 type DialogState = { open: boolean; connection?: WithId<Connection> }
 type MenuState = { anchor: HTMLElement; connection: WithId<Connection> } | null
 
-export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
-  const user = useCurrentUser()
-  const { data: connections, loading, error } = useConnections(user.uid)
+type Props = {
+  connections: { data: WithId<Connection>[]; loading: boolean; error: Error | null }
+  onNavigate?: () => void
+}
+
+const RULE = 'border-(--mui-palette-divider)'
+// The open connection is the context for everything on the right, so it gets the strongest
+// state (solid ink); red stays reserved for actions.
+const OPEN = 'bg-(--mui-palette-text-primary) text-(--mui-palette-background-default)'
+
+export const ConnectionsNav = ({ connections: { data: connections, loading, error }, onNavigate }: Props) => {
+  const { connectionId } = useParams()
   const [menu, setMenu] = useState<MenuState>(null)
   const [editing, setEditing] = useState<DialogState>({ open: false })
   const [deleting, setDeleting] = useState<DialogState>({ open: false })
@@ -40,20 +48,20 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
   }
 
   return (
-    <nav aria-label="Conexões" className="flex flex-col gap-2 py-4">
-      <div className="flex items-center justify-between px-4">
+    <nav aria-label="Conexões" className="flex flex-col">
+      <div className="flex items-center justify-between py-3 pr-3 pl-5 md:pt-5 md:pr-4 md:pl-6">
         <Typography variant="overline" color="text.secondary">
           Conexões
         </Typography>
-        <Button size="small" startIcon={<Plus size={16} />} onClick={() => setEditing({ open: true })}>
-          Nova
+        <Button startIcon={<Plus size={16} />} onClick={() => setEditing({ open: true })}>
+          Nova conexão
         </Button>
       </div>
 
       {loading && (
-        <div className="flex flex-col gap-1 px-4">
-          <Skeleton height={40} />
-          <Skeleton height={40} />
+        <div className="flex flex-col gap-2 px-5 md:px-6">
+          <Skeleton height={32} />
+          <Skeleton height={32} />
         </div>
       )}
 
@@ -64,38 +72,47 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
       )}
 
       {!loading && !error && connections.length === 0 && (
-        <Typography variant="body2" color="text.secondary" className="px-4">
-          Nenhuma conexão ainda. Crie a primeira para cadastrar contatos e enviar mensagens.
+        <Typography variant="body2" color="text.secondary" className="px-5 md:px-6">
+          Nenhuma conexão ainda.
         </Typography>
       )}
 
-      <List dense disablePadding>
-        {connections.map((connection) => (
-          <ListItem
-            key={connection.id}
-            disablePadding
-            secondaryAction={
-              <IconButton
-                edge="end"
-                size="small"
-                aria-label={`Ações de ${connection.name}`}
-                onClick={(event) => setMenu({ anchor: event.currentTarget, connection })}
+      {connections.length > 0 && (
+        <List disablePadding className={`border-t ${RULE}`}>
+          {connections.map((connection) => {
+            const isOpen = connection.id === connectionId
+            return (
+              <ListItem
+                key={connection.id}
+                disablePadding
+                className={isOpen ? OPEN : `border-b ${RULE}`}
+                secondaryAction={
+                  <IconButton
+                    edge="end"
+                    aria-label={`Ações de ${connection.name}`}
+                    className="max-md:size-11"
+                    onClick={(event) => setMenu({ anchor: event.currentTarget, connection })}
+                  >
+                    <EllipsisVertical size={18} />
+                  </IconButton>
+                }
               >
-                <EllipsisVertical size={18} />
-              </IconButton>
-            }
-          >
-            <ListItemButton
-              component={NavLink}
-              to={`/connections/${connection.id}`}
-              onClick={onNavigate}
-              className="aria-[current=page]:bg-(--mui-palette-text-primary) aria-[current=page]:text-(--mui-palette-background-default)"
-            >
-              <ListItemText primary={connection.name} slotProps={{ primary: { noWrap: true } }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+                <ListItemButton
+                  component={NavLink}
+                  to={`/connections/${connection.id}`}
+                  onClick={onNavigate}
+                  className="h-13 py-0 pr-12 pl-5 md:h-12 md:pl-6"
+                >
+                  <ListItemText
+                    primary={connection.name}
+                    slotProps={{ primary: { noWrap: true, className: isOpen ? 'font-semibold' : '' } }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )
+          })}
+        </List>
+      )}
 
       <Menu anchorEl={menu?.anchor} open={menu !== null} onClose={() => setMenu(null)}>
         <MenuItem onClick={() => openFromMenu('edit')}>
@@ -104,11 +121,13 @@ export const ConnectionsNav = ({ onNavigate }: { onNavigate?: () => void }) => {
           </ListItemIcon>
           Renomear
         </MenuItem>
+        <Divider />
+        {/* The ellipsis signals that this opens a confirmation instead of deleting right away. */}
         <MenuItem onClick={() => openFromMenu('delete')} className="text-(--mui-palette-error-main)">
           <ListItemIcon>
             <Trash2 size={16} />
           </ListItemIcon>
-          Excluir
+          Excluir…
         </MenuItem>
       </Menu>
 

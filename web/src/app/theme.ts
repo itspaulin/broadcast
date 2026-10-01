@@ -101,13 +101,36 @@ export const theme = createTheme(
       },
       MuiPaper: { defaultProps: { elevation: 0, square: true } },
       MuiMenu: { styleOverrides: { paper: { boxShadow: shadow.md, minWidth: 200 } } },
-      MuiMenuItem: { styleOverrides: { root: { minHeight: 44, fontSize: 15, gap: 10 } } },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: { minHeight: 44, fontSize: 15, gap: 10, '& .MuiListItemIcon-root': { minWidth: 0 } },
+        },
+      },
       MuiListItemIcon: { styleOverrides: { root: { minWidth: 0, color: 'inherit' } } },
       MuiDialog: { styleOverrides: { paper: { boxShadow: shadow.lg } } },
       MuiBackdrop: {
         styleOverrides: { root: { '&:not(.MuiBackdrop-invisible)': { backgroundColor: `${neutral[900]}80` } } },
       },
-      MuiTabs: { styleOverrides: { indicator: { height: 2 } } },
+      MuiAppBar: { defaultProps: { elevation: 0 } },
+      MuiDrawer: { styleOverrides: { paper: { backgroundColor: ground, borderRight: 'none' } } },
+      MuiTabs: { styleOverrides: { root: { minHeight: 0 }, indicator: { height: 2 } } },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            minWidth: 0,
+            minHeight: 0,
+            padding: '10px 0 12px',
+            marginRight: 32,
+            alignItems: 'flex-start',
+            fontSize: 15,
+            fontWeight: 600,
+            color: neutral[700],
+            '&.Mui-selected': { color: ink, fontWeight: 800 },
+            // Full-width tabs (phones) split the bar evenly instead of hugging their labels.
+            '&.MuiTab-fullWidth': { marginRight: 0, padding: '14px 16px' },
+          },
+        },
+      },
       // Labels sit above the field instead of floating inside its border.
       MuiTextField: { defaultProps: { slotProps: { inputLabel: { shrink: true } } } },
       MuiInputLabel: {
