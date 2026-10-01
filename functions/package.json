@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch src --watch ../shared/src",
+    "dev:scheduler": "node --experimental-strip-types scripts/devScheduler.ts",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",

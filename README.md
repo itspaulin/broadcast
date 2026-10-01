@@ -54,6 +54,7 @@ npm run dev
 ```
 
 `npm run dev` sobe juntos o build em watch das functions, os emuladores (Auth, Firestore, Functions) e o Vite.
+Como o emulador de Functions não dispara funções agendadas, o `dev` também roda um processo que executa a mesma lógica de envio a cada minuto contra o emulador do Firestore.
 Os dados dos emuladores são persistidos em `.emulator-data/` ao encerrar.
 
 Com `VITE_USE_EMULATORS=true` em `web/.env`, o front usa os emuladores; com `false`, o projeto real.
