@@ -215,6 +215,7 @@ export const theme = createTheme(
             '&.Mui-error.Mui-focused': { outlineColor: accent[700] },
           },
           input: { padding: '6px 10px', caretColor: accent[500] },
+          multiline: { padding: 10, '& textarea': { padding: 0, lineHeight: 1.5 } },
           notchedOutline: { top: 0, borderColor: divider, '& legend': { display: 'none' } },
         },
       },

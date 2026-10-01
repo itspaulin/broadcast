@@ -11,3 +11,6 @@ export const isDue = (message: Pick<Message, 'status' | 'scheduledAt'>, nowMilli
 export const canEditMessage = (message: Pick<Message, 'status' | 'sentAt'>, nowMillis: number) =>
   message.status === 'scheduled' ||
   (message.sentAt !== null && nowMillis - message.sentAt.toMillis() < EDIT_WINDOW_MS)
+
+// No zone suffix, so the browser reads it in the user's time zone; the result is UTC millis.
+export const localDateTimeToMillis = (date: string, time: string) => new Date(`${date}T${time}`).getTime()

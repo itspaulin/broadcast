@@ -13,6 +13,8 @@ export const PASSWORD_MIN_LENGTH = 6
 export const MESSAGE_BODY_MAX_LENGTH = 4096
 export const MESSAGE_RECIPIENTS_MAX = 500
 
+export const PAST_SCHEDULE_MESSAGE = 'Esse horário já passou. Escolha um horário no futuro.'
+
 export const EDIT_WINDOW_MS = 15 * 60 * 1000
 export const WRITE_BATCH_LIMIT = 500
 
