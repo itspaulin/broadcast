@@ -1,6 +1,5 @@
 import { COLLECTIONS, type Client } from '@broadcast/shared'
-import LogoutIcon from '@mui/icons-material/Logout'
-import MenuIcon from '@mui/icons-material/Menu'
+import { LogOut, Menu as MenuIcon } from 'lucide-react'
 import { AppBar, Button, Drawer, IconButton, Toolbar, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
@@ -23,7 +22,7 @@ export const AppLayout = () => {
         <Toolbar className="gap-2">
           {!isDesktop && (
             <IconButton color="inherit" edge="start" aria-label="Abrir conexões" onClick={() => setMobileOpen(true)}>
-              <MenuIcon />
+              <MenuIcon size={20} />
             </IconButton>
           )}
           <Typography variant="h6" component="span" className="flex-1">
@@ -32,7 +31,7 @@ export const AppLayout = () => {
           <Typography variant="body2" className="hidden sm:block">
             {client?.name ?? user.email}
           </Typography>
-          <Button color="inherit" startIcon={<LogoutIcon />} onClick={() => signOut()}>
+          <Button color="inherit" startIcon={<LogOut size={16} />} onClick={() => signOut()}>
             Sair
           </Button>
         </Toolbar>

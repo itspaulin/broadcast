@@ -8,7 +8,7 @@ type Props = {
 }
 
 export const AuthLayout = ({ title, footer, children }: Props) => (
-  <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+  <main className="flex min-h-screen items-center justify-center px-4">
     <Paper variant="outlined" className="flex w-full max-w-sm flex-col gap-6 p-6 sm:p-8">
       <div>
         <Typography variant="overline" color="primary">

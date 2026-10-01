@@ -31,7 +31,7 @@ export const ConnectionPage = () => {
 
   return (
     <div className="flex flex-col">
-      <header className="border-b border-slate-200 px-4 pt-4 sm:px-6 sm:pt-6">
+      <header className="border-b-2 border-(--mui-palette-divider) px-4 pt-4 sm:px-6 sm:pt-6">
         <Typography variant="h5" component="h1" noWrap>
           {connection.name}
         </Typography>

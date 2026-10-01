@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { CssBaseline, GlobalStyles, StyledEngineProvider, ThemeProvider } from '@mui/material'
 import { theme } from './app/theme'
 import { App } from './app/App'
+import '@fontsource-variable/archivo'
 import './index.css'
 
 // Emotion injects its styles before index.css, so the layer order must also be declared

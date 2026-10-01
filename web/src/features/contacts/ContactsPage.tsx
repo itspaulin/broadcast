@@ -1,7 +1,5 @@
 import type { Contact, WithId } from '@broadcast/shared'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import {
   Alert,
   Button,
@@ -36,7 +34,7 @@ export const ContactsPage = () => {
         <Typography variant="body2" color="text.secondary">
           {loading ? ' ' : plural(contacts.length, 'contato', 'contatos')}
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setEditing({ open: true })}>
+        <Button variant="contained" startIcon={<Plus size={18} />} onClick={() => setEditing({ open: true })}>
           Novo contato
         </Button>
       </div>
@@ -74,14 +72,14 @@ export const ContactsPage = () => {
                       aria-label={`Editar ${contact.name}`}
                       onClick={() => setEditing({ open: true, contact })}
                     >
-                      <EditIcon fontSize="small" />
+                      <Pencil size={18} />
                     </IconButton>
                     <IconButton
                       edge="end"
                       aria-label={`Excluir ${contact.name}`}
                       onClick={() => setDeleting({ open: true, contact })}
                     >
-                      <DeleteIcon fontSize="small" />
+                      <Trash2 size={18} />
                     </IconButton>
                   </div>
                 }
