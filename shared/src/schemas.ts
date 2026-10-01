@@ -3,8 +3,10 @@ import {
   MESSAGE_BODY_MAX_LENGTH,
   MESSAGE_RECIPIENTS_MAX,
   NAME_MAX_LENGTH,
+  PAST_SCHEDULE_MESSAGE,
   PASSWORD_MIN_LENGTH,
 } from './constants.ts'
+import { isInFuture, localDateTimeToMillis } from './message.ts'
 
 const id = z.string({ error: 'Identificador inválido' }).min(1, 'Identificador inválido')
 
@@ -69,6 +71,26 @@ export const createMessageInputSchema = z.object({
   scheduledAt,
 })
 
+// Shape of the composer form: date and time are the local strings of the native inputs and
+// only become UTC millis when the callable is invoked.
+export const messageFormSchema = z
+  .object({
+    contactIds,
+    body,
+    mode: z.enum(['now', 'schedule']),
+    date: z.string(),
+    time: z.string(),
+  })
+  .superRefine((form, context) => {
+    if (form.mode !== 'schedule') return
+    const millis = localDateTimeToMillis(form.date, form.time)
+    if (Number.isNaN(millis)) {
+      context.addIssue({ code: 'custom', path: ['time'], message: 'Informe a data e a hora do envio.' })
+    } else if (!isInFuture(millis, Date.now())) {
+      context.addIssue({ code: 'custom', path: ['time'], message: PAST_SCHEDULE_MESSAGE })
+    }
+  })
+
 export const updateMessageInputSchema = z.object({
   messageId: id,
   body,
@@ -86,6 +108,7 @@ export type SignInInput = z.infer<typeof signInInputSchema>
 export type SignUpInput = z.infer<typeof signUpInputSchema>
 export type ConnectionInput = z.infer<typeof connectionInputSchema>
 export type ContactInput = z.infer<typeof contactInputSchema>
+export type MessageFormInput = z.infer<typeof messageFormSchema>
 export type CreateMessageInput = z.infer<typeof createMessageInputSchema>
 export type UpdateMessageInput = z.infer<typeof updateMessageInputSchema>
 export type DeleteMessageInput = z.infer<typeof deleteMessageInputSchema>

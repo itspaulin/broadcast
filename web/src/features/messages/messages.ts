@@ -41,3 +41,14 @@ export const summarizeRecipients = (contactIds: string[], contacts: WithId<Conta
   const shown = names.slice(0, NAMES_SHOWN)
   return `${shown.join(', ')} e mais ${contactIds.length - shown.length}`
 }
+
+export const toggleRecipient = (selected: string[], contactId: string) =>
+  selected.includes(contactId) ? selected.filter((id) => id !== contactId) : [...selected, contactId]
+
+// With a search active, "select all" only touches the contacts on screen and keeps the rest
+// of the selection as it was.
+export const toggleRecipients = (selected: string[], visibleIds: string[], select: boolean) => {
+  const visible = new Set(visibleIds)
+  const others = selected.filter((id) => !visible.has(id))
+  return select ? [...others, ...visibleIds] : others
+}
