@@ -1,20 +1,18 @@
 import {
   COLLECTIONS,
   createMessageInputSchema,
-  isInFuture,
   type CreateMessageResult,
   type RecipientStatus,
 } from '@broadcast/shared'
 import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { parseInput, requireClientId } from '../lib/callable.ts'
+import { assertContactsOfConnection, assertInFuture } from '../lib/messages.ts'
 
 export const createMessage = onCall(async (request): Promise<CreateMessageResult> => {
   const clientId = requireClientId(request)
   const { connectionId, contactIds, body, scheduledAt } = parseInput(createMessageInputSchema, request.data)
-  if (scheduledAt !== null && !isInFuture(scheduledAt, Date.now())) {
-    throw new HttpsError('invalid-argument', 'Escolha uma data e hora no futuro.')
-  }
+  if (scheduledAt !== null) assertInFuture(scheduledAt)
 
   const db = getFirestore()
   const connectionRef = db.collection(COLLECTIONS.connections).doc(connectionId)
@@ -26,13 +24,7 @@ export const createMessage = onCall(async (request): Promise<CreateMessageResult
     if (!connection.exists || connection.get('clientId') !== clientId) {
       throw new HttpsError('not-found', 'Conexão não encontrada.')
     }
-    const allFromConnection = contacts.every(
-      (contact) =>
-        contact.exists && contact.get('clientId') === clientId && contact.get('connectionId') === connectionId,
-    )
-    if (!allFromConnection) {
-      throw new HttpsError('failed-precondition', 'Um dos contatos não existe mais. Atualize a seleção.')
-    }
+    assertContactsOfConnection(contacts, clientId, connectionId)
 
     const isScheduled = scheduledAt !== null
     const recipients: Record<string, RecipientStatus> = isScheduled
