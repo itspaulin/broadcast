@@ -166,6 +166,23 @@ export const theme = createTheme(
           notchedOutline: { top: 0, borderColor: divider, '& legend': { display: 'none' } },
         },
       },
+      MuiInputAdornment: { styleOverrides: { root: { color: neutral[700] } } },
+      MuiTableCell: {
+        styleOverrides: {
+          root: { height: 48, padding: '0 8px', fontSize: 15, borderBottom: `1px solid ${divider}` },
+          head: {
+            height: 'auto',
+            padding: 8,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: neutral[700],
+            borderBottom: `2px solid ${divider}`,
+          },
+        },
+      },
+      MuiTableRow: { styleOverrides: { root: { '&.MuiTableRow-hover:hover': { backgroundColor: inkTint(4) } } } },
       MuiFormHelperText: { styleOverrides: { root: { margin: '6px 0 0', fontSize: 12, lineHeight: 1.55 } } },
       MuiAlert: {
         styleOverrides: {
