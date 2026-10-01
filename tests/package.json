@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:unit": "vitest run unit",
     "test:rules": "firebase emulators:exec --project demo-broadcast --only firestore \"vitest run rules\"",
     "test:functions": "npm run build -w functions && firebase emulators:exec --project demo-broadcast --only auth,firestore,functions \"vitest run functions\"",
     "typecheck": "tsc --noEmit"
