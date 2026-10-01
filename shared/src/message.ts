@@ -14,3 +14,7 @@ export const canEditMessage = (message: Pick<Message, 'status' | 'sentAt'>, nowM
 
 // No zone suffix, so the browser reads it in the user's time zone; the result is UTC millis.
 export const localDateTimeToMillis = (date: string, time: string) => new Date(`${date}T${time}`).getTime()
+
+// Whole minutes left to edit a sent message, rounded up so "1 min" shows until the window closes.
+export const editMinutesLeft = (message: Pick<Message, 'sentAt'>, nowMillis: number) =>
+  message.sentAt === null ? 0 : Math.max(0, Math.ceil((message.sentAt.toMillis() + EDIT_WINDOW_MS - nowMillis) / 60_000))

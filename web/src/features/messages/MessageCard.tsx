@@ -1,7 +1,7 @@
-import { canEditMessage, type Contact, type Message, type WithId } from '@broadcast/shared'
+import { canEditMessage, editMinutesLeft, type Contact, type Message, type WithId } from '@broadcast/shared'
 import { Button, IconButton, Typography } from '@mui/material'
-import { Pencil, Trash2, Users } from 'lucide-react'
-import { capitalize, formatWhen } from '../../lib/format'
+import { Clock, Pencil, Trash2, Users } from 'lucide-react'
+import { capitalize, formatDuration, formatWhen } from '../../lib/format'
 import { messageMoment, summarizeRecipients } from './messages'
 import { MessageStatusChip } from './MessageStatusChip'
 
@@ -21,6 +21,7 @@ type Props = MessageActions & {
 
 export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditText, onDelete }: Props) => {
   const scheduled = message.status === 'scheduled'
+  const moment = messageMoment(message)
 
   return (
     <li
@@ -29,7 +30,13 @@ export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditTex
       <div className="flex items-center gap-3">
         <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2">
           <MessageStatusChip status={message.status} />
-          <span className="text-sm font-semibold">{capitalize(formatWhen(messageMoment(message)))}</span>
+          <span className="text-sm font-semibold">{capitalize(formatWhen(moment, now))}</span>
+          {scheduled && (
+            <span className="text-sm font-semibold text-(--mui-palette-error-main)">
+              {/* Due but not picked up yet: the scheduler runs once a minute. */}
+              {moment > now ? `envia em ${formatDuration(moment - now)}` : 'enviando…'}
+            </span>
+          )}
           {message.editedAt && (
             <span className="bg-(--mui-palette-grey-200) px-2 py-0.5 text-xs italic">editado</span>
           )}
@@ -51,7 +58,7 @@ export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditTex
         {summarizeRecipients(message.contactIds, contacts)}
       </Typography>
       {!scheduled && canEditMessage(message, now) && (
-        <div>
+        <div className="flex flex-wrap items-center gap-2.5">
           <Button
             variant="outlined"
             color="inherit"
@@ -62,6 +69,10 @@ export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditTex
           >
             Editar texto
           </Button>
+          <span className="flex items-center gap-1.5 text-[13px] font-semibold text-(--mui-palette-error-main)">
+            <Clock size={14} />
+            editável por mais {editMinutesLeft(message, now)} min
+          </span>
         </div>
       )}
     </li>

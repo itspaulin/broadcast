@@ -1,10 +1,18 @@
-import { messageBodyFormSchema, MESSAGE_BODY_MAX_LENGTH, type Message, type WithId } from '@broadcast/shared'
+import {
+  editMinutesLeft,
+  messageBodyFormSchema,
+  MESSAGE_BODY_MAX_LENGTH,
+  type Message,
+  type WithId,
+} from '@broadcast/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Typography } from '@mui/material'
+import { Clock } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { FormDialog } from '../../components/FormDialog'
 import { FormTextField } from '../../components/FormTextField'
 import { callableErrorMessage } from '../../lib/callableErrors'
+import { useNow } from '../../lib/useNow'
 import { updateMessage } from './messagesService'
 
 type Props = {
@@ -14,6 +22,7 @@ type Props = {
 }
 
 export const EditSentMessageDialog = ({ open, message, onClose }: Props) => {
+  const now = useNow()
   const { control, handleSubmit, setError, formState, reset } = useForm({
     resolver: zodResolver(messageBodyFormSchema),
     values: { body: message?.body ?? '' },
@@ -44,6 +53,15 @@ export const EditSentMessageDialog = ({ open, message, onClose }: Props) => {
       onSubmit={onSubmit}
       onClose={close}
     >
+      {message && (
+        <Typography
+          variant="body2"
+          className="flex items-center gap-2 text-sm font-semibold text-(--mui-palette-error-main)"
+        >
+          <Clock size={16} />
+          Editável por mais {editMinutesLeft(message, now)} min
+        </Typography>
+      )}
       <FormTextField
         control={control}
         name="body"
