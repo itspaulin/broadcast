@@ -11,6 +11,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "emulators": "firebase emulators:start --only auth,firestore,functions --import .emulator-data --export-on-exit",
     "dev": "npm run build -w functions && concurrently -k -n functions,emulators,scheduler,web -c blue,magenta,yellow,green \"npm run build:watch -w functions\" \"npm run emulators\" \"npm run dev:scheduler -w functions\" \"npm run dev -w web\"",
+    "seed": "npm run seed -w web --",
     "lint": "oxlint --deny-warnings",
     "build": "npm run build --workspaces --if-present",
     "test:unit": "npm run test:unit -w tests",
