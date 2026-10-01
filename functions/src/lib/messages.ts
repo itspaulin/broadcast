@@ -1,6 +1,9 @@
-import { isInFuture } from '@broadcast/shared'
+import { isInFuture, type RecipientStatus } from '@broadcast/shared'
 import type { DocumentSnapshot } from 'firebase-admin/firestore'
 import { HttpsError } from 'firebase-functions/v2/https'
+
+export const sentRecipients = (contactIds: string[]): Record<string, RecipientStatus> =>
+  Object.fromEntries(contactIds.map((contactId) => [contactId, 'sent']))
 
 export const assertInFuture = (scheduledAt: number) => {
   if (!isInFuture(scheduledAt, Date.now())) {

@@ -37,8 +37,11 @@ Detalhes, alternativas e consequências: [ADR 0001](docs/decisions/0001-modelage
 
 ## Agendamento
 
-Uma função `onSchedule` roda a cada minuto, busca mensagens com `status == 'scheduled'` e `scheduledAt <= now` e as marca como `sent` em lote.
+Uma função `onSchedule` roda a cada minuto, busca mensagens com `status == 'scheduled'` e `scheduledAt <= now` em páginas de 500 e marca cada uma como `sent`.
+Cada escrita leva a precondição `lastUpdateTime`: uma mensagem editada ou excluída no meio da execução não é sobrescrita, e execuções repetidas não enviam a mesma mensagem duas vezes.
 Requer o plano **Blaze** do Firebase.
+
+Detalhes do ciclo de vida das mensagens e alternativas: [ADR 0002](docs/decisions/0002-ciclo-de-vida-das-mensagens.md).
 
 ## Rodando localmente
 

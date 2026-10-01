@@ -1,13 +1,8 @@
-import {
-  COLLECTIONS,
-  createMessageInputSchema,
-  type CreateMessageResult,
-  type RecipientStatus,
-} from '@broadcast/shared'
+import { COLLECTIONS, createMessageInputSchema, type CreateMessageResult } from '@broadcast/shared'
 import { FieldValue, getFirestore, Timestamp } from 'firebase-admin/firestore'
 import { HttpsError, onCall } from 'firebase-functions/v2/https'
 import { parseInput, requireClientId } from '../lib/callable.ts'
-import { assertContactsOfConnection, assertInFuture } from '../lib/messages.ts'
+import { assertContactsOfConnection, assertInFuture, sentRecipients } from '../lib/messages.ts'
 
 export const createMessage = onCall(async (request): Promise<CreateMessageResult> => {
   const clientId = requireClientId(request)
@@ -27,15 +22,12 @@ export const createMessage = onCall(async (request): Promise<CreateMessageResult
     assertContactsOfConnection(contacts, clientId, connectionId)
 
     const isScheduled = scheduledAt !== null
-    const recipients: Record<string, RecipientStatus> = isScheduled
-      ? {}
-      : Object.fromEntries(contactIds.map((contactId) => [contactId, 'sent']))
 
     transaction.create(messageRef, {
       clientId,
       connectionId,
       contactIds,
-      recipients,
+      recipients: isScheduled ? {} : sentRecipients(contactIds),
       body,
       status: isScheduled ? 'scheduled' : 'sent',
       scheduledAt: isScheduled ? Timestamp.fromMillis(scheduledAt) : null,
