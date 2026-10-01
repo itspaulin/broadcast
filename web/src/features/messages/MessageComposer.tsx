@@ -24,7 +24,14 @@ const emptyForm: MessageFormInput = { contactIds: [], body: '', mode: 'now', dat
 
 const SECTION = 'text-[13px] font-semibold'
 
-export const MessageComposer = () => {
+type Props = {
+  // 'screen' fills a full-screen dialog on phones: scrolling body and the action fixed at the bottom.
+  layout: 'panel' | 'screen'
+  onSent?: () => void
+}
+
+export const MessageComposer = ({ layout, onSent }: Props) => {
+  const screen = layout === 'screen'
   const { connection, contacts } = useConnectionContext()
   const { control, handleSubmit, setError, setValue, getValues, reset, formState } = useForm({
     resolver: zodResolver(messageFormSchema),
@@ -56,6 +63,7 @@ export const MessageComposer = () => {
         scheduledAt: form.mode === 'schedule' ? localDateTimeToMillis(form.date, form.time) : null,
       })
       reset(emptyForm)
+      onSent?.()
     } catch (error) {
       setError('root', { message: callableErrorMessage(error, 'Não foi possível enviar a mensagem. Tente novamente.') })
     }
@@ -66,88 +74,100 @@ export const MessageComposer = () => {
   const recipients = contactIds.length > 0 ? ` para ${plural(contactIds.length, 'contato', 'contatos')}` : ''
 
   return (
-    <form noValidate onSubmit={onSubmit} aria-label="Nova mensagem" className="flex flex-col gap-5">
-      <Typography variant="h6" component="h2">
-        Nova mensagem
-      </Typography>
-
-      <Controller
-        control={control}
-        name="contactIds"
-        render={({ field, fieldState }) => (
-          <RecipientsPicker
-            contacts={contacts.data}
-            value={contactIds}
-            onChange={field.onChange}
-            error={fieldState.error?.message}
-          />
-        )}
-      />
-
-      <div className="flex flex-col gap-2">
-        <label htmlFor="message-body" className={SECTION}>
-          2 · Mensagem
-        </label>
-        <FormTextField
-          control={control}
-          name="body"
-          id="message-body"
-          multiline
-          minRows={5}
-          placeholder="Escreva o que seus clientes vão receber"
-          slotProps={{ htmlInput: { maxLength: MESSAGE_BODY_MAX_LENGTH } }}
-          helperText={
-            <span className="flex justify-between">
-              Quebras de linha são mantidas.
-              <span
-                className={`tabular-nums ${body.length > COUNTER_WARNING_AT ? 'text-(--mui-palette-error-main)' : ''}`}
-              >
-                {body.length.toLocaleString('pt-BR')} / {MESSAGE_BODY_MAX_LENGTH.toLocaleString('pt-BR')}
-              </span>
-            </span>
-          }
-        />
-      </div>
-
-      <div className="flex flex-col gap-2.5">
-        <span id="message-when" className={SECTION}>
-          3 · Quando enviar
-        </span>
-        <ToggleButtonGroup
-          exclusive
-          value={mode}
-          onChange={(_, next: MessageFormInput['mode'] | null) => next && changeMode(next)}
-          aria-labelledby="message-when"
-          className="grid grid-cols-2"
-        >
-          <ToggleButton value="now" className="min-h-11 justify-start gap-2 text-sm">
-            <Send size={16} />
-            Enviar agora
-          </ToggleButton>
-          <ToggleButton value="schedule" className="min-h-11 justify-start gap-2 text-sm">
-            <Calendar size={16} />
-            Agendar
-          </ToggleButton>
-        </ToggleButtonGroup>
-        {mode === 'schedule' && <ScheduleFields control={control} />}
-      </div>
-
-      {formState.errors.root && (
-        <Alert severity="error" icon={<TriangleAlert size={20} />}>
-          {formState.errors.root.message}
-        </Alert>
+    <form
+      noValidate
+      onSubmit={onSubmit}
+      aria-label="Nova mensagem"
+      className={screen ? 'flex min-h-0 flex-1 flex-col' : 'flex flex-col gap-5'}
+    >
+      {!screen && (
+        <Typography variant="h6" component="h2">
+          Nova mensagem
+        </Typography>
       )}
 
-      <Button
-        type="submit"
-        variant="contained"
-        size="large"
-        disabled={submitting}
-        className="min-h-12 text-[15px]"
-        endIcon={submitting ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={18} />}
-      >
-        {submitting ? 'Enviando…' : `${action}${recipients}`}
-      </Button>
+      <div className={screen ? 'flex flex-1 flex-col gap-5 overflow-auto p-4' : 'contents'}>
+        <Controller
+          control={control}
+          name="contactIds"
+          render={({ field, fieldState }) => (
+            <RecipientsPicker
+              contacts={contacts.data}
+              value={contactIds}
+              onChange={field.onChange}
+              error={fieldState.error?.message}
+              compact={screen}
+            />
+          )}
+        />
+
+        <div className="flex flex-col gap-2">
+          <label htmlFor="message-body" className={SECTION}>
+            2 · Mensagem
+          </label>
+          <FormTextField
+            control={control}
+            name="body"
+            id="message-body"
+            multiline
+            minRows={5}
+            placeholder="Escreva o que seus clientes vão receber"
+            slotProps={{ htmlInput: { maxLength: MESSAGE_BODY_MAX_LENGTH } }}
+            helperText={
+              <span className="flex justify-between">
+                Quebras de linha são mantidas.
+                <span
+                  className={`tabular-nums ${body.length > COUNTER_WARNING_AT ? 'text-(--mui-palette-error-main)' : ''}`}
+                >
+                  {body.length.toLocaleString('pt-BR')} / {MESSAGE_BODY_MAX_LENGTH.toLocaleString('pt-BR')}
+                </span>
+              </span>
+            }
+          />
+        </div>
+
+        <div className="flex flex-col gap-2.5">
+          <span id="message-when" className={SECTION}>
+            3 · Quando enviar
+          </span>
+          <ToggleButtonGroup
+            exclusive
+            value={mode}
+            onChange={(_, next: MessageFormInput['mode'] | null) => next && changeMode(next)}
+            aria-labelledby="message-when"
+            className="grid grid-cols-2"
+          >
+            <ToggleButton value="now" className="min-h-11 justify-start gap-2 text-sm">
+              <Send size={16} />
+              Enviar agora
+            </ToggleButton>
+            <ToggleButton value="schedule" className="min-h-11 justify-start gap-2 text-sm">
+              <Calendar size={16} />
+              Agendar
+            </ToggleButton>
+          </ToggleButtonGroup>
+          {mode === 'schedule' && <ScheduleFields control={control} />}
+        </div>
+      </div>
+
+      <div className={screen ? 'flex flex-none flex-col gap-3 border-t-2 border-(--mui-palette-divider) p-4' : 'contents'}>
+        {formState.errors.root && (
+          <Alert severity="error" icon={<TriangleAlert size={20} />}>
+            {formState.errors.root.message}
+          </Alert>
+        )}
+
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={submitting}
+          className="min-h-12 text-[15px]"
+          endIcon={submitting ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={18} />}
+        >
+          {submitting ? 'Enviando…' : `${action}${recipients}`}
+        </Button>
+      </div>
     </form>
   )
 }
