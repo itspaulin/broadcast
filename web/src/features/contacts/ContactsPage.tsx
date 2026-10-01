@@ -1,99 +1,149 @@
 import type { Contact, WithId } from '@broadcast/shared'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
-import {
-  Alert,
-  Button,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Skeleton,
-  Typography,
-} from '@mui/material'
+import { Button, InputAdornment, Skeleton, TextField, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Plus, Search, UserPlus } from 'lucide-react'
 import { useState } from 'react'
-import { formatPhone, plural } from '../../lib/format'
-import { useCurrentUser } from '../auth/authContext'
-import { useConnection } from '../connections/connectionContext'
+import { EmptyState } from '../../components/EmptyState'
+import { LoadError } from '../../components/LoadError'
+import { plural } from '../../lib/format'
+import { useConnectionContext } from '../connections/connectionContext'
 import { ContactDialog } from './ContactDialog'
+import { ContactsList } from './ContactsList'
+import { ContactsTable } from './ContactsTable'
 import { DeleteContactDialog } from './DeleteContactDialog'
-import { useContacts } from './contactsService'
+import { searchContacts } from './searchContacts'
 
-type DialogState = { open: boolean; contact?: WithId<Contact> }
+// Dialogs keep their target after closing so the exit animation does not flash empty content.
+type EditState = { open: boolean; contact?: WithId<Contact>; initialName?: string }
+type DeleteState = { open: boolean; contact?: WithId<Contact> }
+
+const RULE = 'border-(--mui-palette-divider)'
 
 export const ContactsPage = () => {
-  const user = useCurrentUser()
-  const connection = useConnection()
-  const { data: contacts, loading, error } = useContacts(user.uid, connection.id)
-  const [editing, setEditing] = useState<DialogState>({ open: false })
-  const [deleting, setDeleting] = useState<DialogState>({ open: false })
+  const { connection, contacts } = useConnectionContext()
+  const isDesktop = useMediaQuery(useTheme().breakpoints.up('md'))
+  const [search, setSearch] = useState('')
+  const [editing, setEditing] = useState<EditState>({ open: false })
+  const [deleting, setDeleting] = useState<DeleteState>({ open: false })
+
+  const visible = searchContacts(contacts.data, search)
+  const hasContacts = contacts.data.length > 0
+  const actions = {
+    onEdit: (contact: WithId<Contact>) => setEditing({ open: true, contact }),
+    onDelete: (contact: WithId<Contact>) => setDeleting({ open: true, contact }),
+  }
+  const create = (initialName?: string) => setEditing({ open: true, initialName })
 
   return (
-    <section aria-label="Contatos" className="flex max-w-3xl flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
-        <Typography variant="body2" color="text.secondary">
-          {loading ? ' ' : plural(contacts.length, 'contato', 'contatos')}
-        </Typography>
-        <Button variant="contained" startIcon={<Plus size={18} />} onClick={() => setEditing({ open: true })}>
-          Novo contato
-        </Button>
-      </div>
-
-      {error && <Alert severity="error">Não foi possível carregar os contatos.</Alert>}
-
-      {loading && (
-        <div className="flex flex-col gap-1">
-          <Skeleton height={56} />
-          <Skeleton height={56} />
-          <Skeleton height={56} />
+    <section aria-label="Contatos" className="flex max-w-[1064px] flex-col md:gap-4 md:px-8 md:py-6">
+      {hasContacts && (
+        <div className={`flex items-center gap-4 max-md:border-b max-md:px-4 max-md:py-3 ${RULE}`}>
+          <TextField
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por nome ou telefone"
+            className="w-full md:w-[360px]"
+            slotProps={{
+              htmlInput: { 'aria-label': 'Buscar por nome ou telefone' },
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search size={18} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+          <Typography variant="body2" color="text.secondary" className="mr-auto text-sm max-md:hidden">
+            {search.trim()
+              ? `${visible.length} de ${plural(contacts.data.length, 'contato', 'contatos')}`
+              : plural(contacts.data.length, 'contato', 'contatos')}
+          </Typography>
+          {isDesktop && (
+            <Button variant="contained" size="large" startIcon={<Plus size={18} />} onClick={() => create()}>
+              Novo contato
+            </Button>
+          )}
         </div>
       )}
 
-      {!loading && !error && contacts.length === 0 && (
-        <Paper variant="outlined" className="flex flex-col items-center gap-2 p-8 text-center">
-          <Typography>Nenhum contato nesta conexão.</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Adicione contatos para enviar mensagens a eles pelo Broadcast.
-          </Typography>
-        </Paper>
+      {contacts.loading && (
+        <div className={`border-t-2 max-md:mx-4 ${RULE}`} aria-label="Carregando contatos" role="status">
+          {[0, 1, 2, 3].map((row) => (
+            <div key={row} className={`flex h-12 items-center gap-6 border-b ${RULE}`}>
+              <Skeleton width={160} height={12} />
+              <Skeleton width={110} height={12} />
+            </div>
+          ))}
+        </div>
       )}
 
-      {contacts.length > 0 && (
-        <Paper variant="outlined">
-          <List disablePadding>
-            {contacts.map((contact, index) => (
-              <ListItem
-                key={contact.id}
-                divider={index < contacts.length - 1}
-                className="pr-28"
-                secondaryAction={
-                  <div className="flex gap-1">
-                    <IconButton
-                      aria-label={`Editar ${contact.name}`}
-                      onClick={() => setEditing({ open: true, contact })}
-                    >
-                      <Pencil size={18} />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label={`Excluir ${contact.name}`}
-                      onClick={() => setDeleting({ open: true, contact })}
-                    >
-                      <Trash2 size={18} />
-                    </IconButton>
-                  </div>
-                }
-              >
-                <ListItemText primary={contact.name} secondary={formatPhone(contact.phone)} />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
+      {contacts.error && (
+        <div className="max-md:p-4">
+          <LoadError
+            title="Não foi possível carregar os contatos."
+            hint="Verifique sua internet. Nada foi perdido."
+            onRetry={contacts.retry}
+          />
+        </div>
+      )}
+
+      {!contacts.loading && !contacts.error && !hasContacts && (
+        <div className="max-md:px-4">
+          <EmptyState
+            icon={<UserPlus size={32} strokeWidth={1.75} />}
+            title={`Nenhum contato em ${connection.name}`}
+            description="Adicione quem deve receber suas mensagens. Basta nome e telefone com DDD."
+            action={
+              <Button variant="contained" size="large" startIcon={<Plus size={18} />} onClick={() => create()}>
+                Adicionar primeiro contato
+              </Button>
+            }
+          />
+        </div>
+      )}
+
+      {hasContacts && visible.length === 0 && (
+        <div className="flex flex-col items-start gap-3.5 max-md:p-4">
+          <Typography>Nenhum contato encontrado para "{search.trim()}".</Typography>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outlined" color="inherit" onClick={() => setSearch('')}>
+              Limpar busca
+            </Button>
+            <Button startIcon={<Plus size={16} />} onClick={() => create(search.trim())}>
+              Criar "{search.trim()}"
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {visible.length > 0 &&
+        (isDesktop ? (
+          <ContactsTable contacts={visible} {...actions} />
+        ) : (
+          <ContactsList contacts={visible} {...actions} />
+        ))}
+
+      {!isDesktop && hasContacts && (
+        // Leaves room for the fixed action below the last row.
+        <div className="h-24">
+          <div className="fixed inset-x-4 bottom-5">
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={() => create()}
+              className="min-h-13 justify-center text-base shadow-[0_3px_10px_rgba(45,43,43,0.16)]"
+            >
+              Novo contato
+            </Button>
+          </div>
+        </div>
       )}
 
       <ContactDialog
         open={editing.open}
         contact={editing.contact}
+        initialName={editing.initialName}
         onClose={() => setEditing((current) => ({ ...current, open: false }))}
       />
       <DeleteContactDialog

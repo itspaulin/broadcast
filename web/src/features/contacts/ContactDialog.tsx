@@ -5,21 +5,23 @@ import { useForm } from 'react-hook-form'
 import { FormTextField } from '../../components/FormTextField'
 import { formatPhone } from '../../lib/format'
 import { useCurrentUser } from '../auth/authContext'
-import { useConnection } from '../connections/connectionContext'
+import { useConnectionContext } from '../connections/connectionContext'
 import { createContact, updateContact } from './contactsService'
 
 type Props = {
   open: boolean
   onClose: () => void
   contact?: WithId<Contact>
+  // Prefills the name when creating from a search that found nothing.
+  initialName?: string
 }
 
-export const ContactDialog = ({ open, onClose, contact }: Props) => {
+export const ContactDialog = ({ open, onClose, contact, initialName = '' }: Props) => {
   const user = useCurrentUser()
-  const connection = useConnection()
+  const { connection } = useConnectionContext()
   const { control, handleSubmit, setError, formState, reset } = useForm({
     resolver: zodResolver(contactInputSchema),
-    values: { name: contact?.name ?? '', phone: contact ? formatPhone(contact.phone) : '' },
+    values: { name: contact?.name ?? initialName, phone: contact ? formatPhone(contact.phone) : '' },
   })
 
   const close = () => {
