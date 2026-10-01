@@ -1,8 +1,9 @@
 import { Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { ChevronRight, MessageSquare, Users } from 'lucide-react'
+import { ChevronRight, MessageSquare, Plus, Users, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { EmptyState } from '../../components/EmptyState'
+import { FullScreenDialog } from '../../components/FullScreenDialog'
 import { LoadError } from '../../components/LoadError'
 import { useCurrentUser } from '../auth/authContext'
 import { useConnectionContext } from '../connections/connectionContext'
@@ -25,6 +26,7 @@ export const BroadcastPage = () => {
   const messages = useMessages(user.uid, connection.id)
   const isDesktop = useMediaQuery(useTheme().breakpoints.up('md'))
   const [filter, setFilter] = useState<MessageFilter>('all')
+  const [composing, setComposing] = useState(false)
 
   const visible = filterMessages(messages.data, filter)
   const hasMessages = messages.data.length > 0
@@ -56,7 +58,7 @@ export const BroadcastPage = () => {
   return (
     <div className="md:grid md:grid-cols-[460px_minmax(0,1fr)]">
       {isDesktop && (
-        <div className={`border-r-2 px-8 py-6 ${RULE}`}>{noContacts ? noRecipients : <MessageComposer />}</div>
+        <div className={`border-r-2 px-8 py-6 ${RULE}`}>{noContacts ? noRecipients : <MessageComposer layout="panel" />}</div>
       )}
 
       <section aria-label="Mensagens" className="flex min-w-0 flex-col">
@@ -116,6 +118,34 @@ export const BroadcastPage = () => {
           </ul>
         )}
       </section>
+
+      {!isDesktop && noContacts && <div className="px-4 pb-6">{noRecipients}</div>}
+
+      {!isDesktop && !noContacts && (
+        // Leaves room for the fixed action below the last message.
+        <div className="h-24">
+          <div className="fixed inset-x-4 bottom-5">
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={() => setComposing(true)}
+              className="min-h-13 justify-center text-base shadow-[0_3px_10px_rgba(45,43,43,0.16)]"
+            >
+              Nova mensagem
+            </Button>
+          </div>
+          <FullScreenDialog
+            open={composing}
+            title="Nova mensagem"
+            closeIcon={<X size={22} />}
+            closeLabel="Fechar"
+            onClose={() => setComposing(false)}
+          >
+            <MessageComposer layout="screen" onSent={() => setComposing(false)} />
+          </FullScreenDialog>
+        </div>
+      )}
     </div>
   )
 }
