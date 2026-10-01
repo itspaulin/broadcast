@@ -1,20 +1,48 @@
-import type { Contact, WithId } from '@broadcast/shared'
+import type { Contact, Message, WithId } from '@broadcast/shared'
+import { Alert, Typography } from '@mui/material'
+import { Info } from 'lucide-react'
 import { ConfirmDeleteDialog } from '../../components/ConfirmDeleteDialog'
 import { callableErrorMessage } from '../../lib/callableErrors'
-import { plural } from '../../lib/format'
+import { formatWhen, plural, truncate } from '../../lib/format'
 import { useCurrentUser } from '../auth/authContext'
 import { deleteContact, findScheduledMessagesWith } from './contactsService'
 
-const describeImpact = (recipientCounts: number[]) => {
-  if (recipientCounts.length === 0) return 'Nenhuma mensagem agendada será alterada.'
-  const emptied = recipientCounts.filter((count) => count === 1).length
-  const removal = `O contato será removido de ${plural(recipientCounts.length, 'mensagem agendada', 'mensagens agendadas')}.`
-  if (emptied === 0) return removal
-  return `${removal} ${
-    emptied === 1
-      ? '1 delas ficará sem destinatários e será excluída.'
-      : `${emptied} delas ficarão sem destinatários e serão excluídas.`
-  }`
+const NOTE = 'Mensagens já enviadas continuam no histórico. Esta ação não pode ser desfeita.'
+const PREVIEW_LENGTH = 28
+const LISTED_MESSAGES = 3
+
+const describeImpact = (messages: Message[]) => {
+  // A scheduled message whose only recipient is this contact has no one left to send to.
+  const emptied = messages.filter((message) => message.contactIds.length === 1)
+
+  return (
+    <>
+      <Typography>
+        {messages.length === 0 ? (
+          'Nenhuma mensagem agendada será alterada.'
+        ) : (
+          <>
+            O contato será removido de{' '}
+            <strong className="font-semibold">
+              {plural(messages.length, 'mensagem agendada', 'mensagens agendadas')}
+            </strong>
+            .
+            {emptied.length === 1 && ' 1 delas ficará sem destinatários e será excluída.'}
+            {emptied.length > 1 && ` ${emptied.length} delas ficarão sem destinatários e serão excluídas.`}
+          </>
+        )}
+      </Typography>
+      {emptied.slice(0, LISTED_MESSAGES).map((message, index) => (
+        <Alert key={index} severity="error" icon={<Info size={16} />}>
+          "{truncate(message.body, PREVIEW_LENGTH)}"
+          {message.scheduledAt && ` (${formatWhen(message.scheduledAt.toMillis())})`} será excluída.
+        </Alert>
+      ))}
+      <Typography variant="body2" color="text.secondary">
+        {NOTE}
+      </Typography>
+    </>
+  )
 }
 
 type Props = {
@@ -31,12 +59,15 @@ export const DeleteContactDialog = ({ open, contact, onClose }: Props) => {
   return (
     <ConfirmDeleteDialog
       open={open}
-      title={`Excluir “${contact.name}”?`}
+      title={`Excluir "${contact.name}"?`}
+      confirmLabel="Excluir contato"
+      loadingHint="Verificando as mensagens agendadas deste contato…"
       describe={() =>
-        findScheduledMessagesWith(user.uid, contact.id).then(
-          (messages) => describeImpact(messages.map((message) => message.contactIds.length)),
-          () => 'O contato será removido das mensagens agendadas; as que ficarem sem destinatários serão excluídas.',
-        )
+        findScheduledMessagesWith(user.uid, contact.id).then(describeImpact, () => (
+          <Typography>
+            O contato será removido das mensagens agendadas; as que ficarem sem destinatários serão excluídas. {NOTE}
+          </Typography>
+        ))
       }
       onConfirm={async () => {
         await deleteContact(contact.id)

@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  type QueryConstraint,
 } from 'firebase/firestore'
 import { httpsCallable } from 'firebase/functions'
 import { useMemo } from 'react'
@@ -28,23 +29,21 @@ export const createConnection = (clientId: string, { name }: ConnectionInput) =>
 export const renameConnection = (connectionId: string, { name }: ConnectionInput) =>
   updateDoc(doc(connections, connectionId), { name, updatedAt: serverTimestamp() })
 
-const countOf = async (collectionName: string, clientId: string, connectionId: string) => {
-  const snapshot = await getCountFromServer(
-    query(
-      collection(db, collectionName),
-      where('clientId', '==', clientId),
-      where('connectionId', '==', connectionId),
-    ),
-  )
+const countWhere = async (collectionName: string, ...filters: QueryConstraint[]) => {
+  const snapshot = await getCountFromServer(query(collection(db, collectionName), ...filters))
   return snapshot.data().count
 }
 
-export const countConnectionData = async (clientId: string, connectionId: string) => {
-  const [contacts, messages] = await Promise.all([
-    countOf(COLLECTIONS.contacts, clientId, connectionId),
-    countOf(COLLECTIONS.messages, clientId, connectionId),
+export type ConnectionImpact = { contacts: number; messages: number; scheduled: number }
+
+export const countConnectionData = async (clientId: string, connectionId: string): Promise<ConnectionImpact> => {
+  const ofConnection = [where('clientId', '==', clientId), where('connectionId', '==', connectionId)]
+  const [contacts, messages, scheduled] = await Promise.all([
+    countWhere(COLLECTIONS.contacts, ...ofConnection),
+    countWhere(COLLECTIONS.messages, ...ofConnection),
+    countWhere(COLLECTIONS.messages, ...ofConnection, where('status', '==', 'scheduled')),
   ])
-  return { contacts, messages }
+  return { contacts, messages, scheduled }
 }
 
 const deleteConnectionCallable = httpsCallable<DeleteConnectionInput, DeleteConnectionResult>(
