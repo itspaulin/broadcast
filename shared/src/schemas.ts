@@ -91,6 +91,9 @@ export const messageFormSchema = z
     }
   })
 
+// Editing a sent message changes only its text.
+export const messageBodyFormSchema = z.object({ body })
+
 export const updateMessageInputSchema = z.object({
   messageId: id,
   body,
@@ -108,6 +111,7 @@ export type SignInInput = z.infer<typeof signInInputSchema>
 export type SignUpInput = z.infer<typeof signUpInputSchema>
 export type ConnectionInput = z.infer<typeof connectionInputSchema>
 export type ContactInput = z.infer<typeof contactInputSchema>
+export type MessageBodyFormInput = z.infer<typeof messageBodyFormSchema>
 export type MessageFormInput = z.infer<typeof messageFormSchema>
 export type CreateMessageInput = z.infer<typeof createMessageInputSchema>
 export type UpdateMessageInput = z.infer<typeof updateMessageInputSchema>
