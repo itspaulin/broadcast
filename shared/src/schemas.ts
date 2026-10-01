@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { MESSAGE_BODY_MAX_LENGTH, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from './constants.ts'
+import {
+  MESSAGE_BODY_MAX_LENGTH,
+  MESSAGE_RECIPIENTS_MAX,
+  NAME_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+} from './constants.ts'
 
 const id = z.string({ error: 'Identificador inválido' }).min(1, 'Identificador inválido')
 
@@ -29,6 +34,7 @@ const body = z
 const contactIds = z
   .array(id)
   .min(1, 'Selecione ao menos um contato')
+  .max(MESSAGE_RECIPIENTS_MAX, `Selecione no máximo ${MESSAGE_RECIPIENTS_MAX} contatos`)
   .transform((ids) => [...new Set(ids)])
 
 const scheduledAt = z.number().int().positive().nullable()
@@ -86,5 +92,6 @@ export type DeleteMessageInput = z.infer<typeof deleteMessageInputSchema>
 export type DeleteContactInput = z.infer<typeof deleteContactInputSchema>
 export type DeleteConnectionInput = z.infer<typeof deleteConnectionInputSchema>
 
-export type DeleteConnectionResult = { contacts: number; messages: number }
+export type CreateMessageResult = { messageId: string }
+export type DeleteConnectionResult ={ contacts: number; messages: number }
 export type DeleteContactResult = { updatedMessages: number; deletedMessages: number }
