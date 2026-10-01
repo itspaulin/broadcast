@@ -3,6 +3,7 @@ import { GuestOnly, RequireAuth } from '../features/auth/guards'
 import { LoginPage } from '../features/auth/LoginPage'
 import { SignUpPage } from '../features/auth/SignUpPage'
 import { ConnectionPage } from '../features/connections/ConnectionPage'
+import { ConnectionsHome } from '../features/connections/ConnectionsHome'
 import { ContactsPage } from '../features/contacts/ContactsPage'
 import { Placeholder } from '../components/Placeholder'
 import { AppLayout } from './AppLayout'
@@ -21,7 +22,7 @@ export const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          { index: true, element: <Placeholder>Selecione ou crie uma conexão.</Placeholder> },
+          { index: true, element: <ConnectionsHome /> },
           {
             path: 'connections/:connectionId',
             element: <ConnectionPage />,
