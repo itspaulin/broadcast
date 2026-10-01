@@ -1,28 +1,69 @@
-import type { Contact, Message, WithId } from '@broadcast/shared'
-import { Typography } from '@mui/material'
-import { Users } from 'lucide-react'
+import { canEditMessage, type Contact, type Message, type WithId } from '@broadcast/shared'
+import { Button, IconButton, Typography } from '@mui/material'
+import { Pencil, Trash2, Users } from 'lucide-react'
 import { capitalize, formatWhen } from '../../lib/format'
 import { messageMoment, summarizeRecipients } from './messages'
 import { MessageStatusChip } from './MessageStatusChip'
 
-type Props = {
-  message: WithId<Message>
-  contacts: WithId<Contact>[]
+export type MessageActions = {
+  onEdit: (message: WithId<Message>) => void
+  onEditText: (message: WithId<Message>) => void
+  onDelete: (message: WithId<Message>) => void
 }
 
-export const MessageCard = ({ message, contacts }: Props) => (
-  <li className="flex flex-col gap-2.5 border-b border-(--mui-palette-divider) px-4 py-5 md:px-8">
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <MessageStatusChip status={message.status} />
-      <span className="text-sm font-semibold">{capitalize(formatWhen(messageMoment(message)))}</span>
-      {message.editedAt && (
-        <span className="bg-(--mui-palette-grey-200) px-2 py-0.5 text-xs italic">editado</span>
+type Props = MessageActions & {
+  message: WithId<Message>
+  contacts: WithId<Contact>[]
+  now: number
+  // Highlights the scheduled message currently loaded in the composer.
+  editing: boolean
+}
+
+export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditText, onDelete }: Props) => {
+  const scheduled = message.status === 'scheduled'
+
+  return (
+    <li
+      className={`flex flex-col gap-2.5 border-b border-(--mui-palette-divider) px-4 py-5 md:px-8 ${editing ? 'bg-(--mui-palette-background-paper)' : ''}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-2">
+          <MessageStatusChip status={message.status} />
+          <span className="text-sm font-semibold">{capitalize(formatWhen(messageMoment(message)))}</span>
+          {message.editedAt && (
+            <span className="bg-(--mui-palette-grey-200) px-2 py-0.5 text-xs italic">editado</span>
+          )}
+        </div>
+        <div className="-my-2 flex gap-0.5">
+          {scheduled && (
+            <IconButton aria-label="Editar mensagem" onClick={() => onEdit(message)}>
+              <Pencil size={16} />
+            </IconButton>
+          )}
+          <IconButton aria-label="Excluir mensagem" onClick={() => onDelete(message)}>
+            <Trash2 size={16} />
+          </IconButton>
+        </div>
+      </div>
+      <Typography className="max-w-[620px] text-pretty break-words whitespace-pre-wrap">{message.body}</Typography>
+      <Typography variant="body2" className="flex items-center gap-1.5 text-(--mui-palette-grey-800)">
+        <Users size={14} />
+        {summarizeRecipients(message.contactIds, contacts)}
+      </Typography>
+      {!scheduled && canEditMessage(message, now) && (
+        <div>
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<Pencil size={14} />}
+            className="text-[13px]"
+            onClick={() => onEditText(message)}
+          >
+            Editar texto
+          </Button>
+        </div>
       )}
-    </div>
-    <Typography className="max-w-[620px] text-pretty break-words whitespace-pre-wrap">{message.body}</Typography>
-    <Typography variant="body2" className="flex items-center gap-1.5 text-(--mui-palette-grey-800)">
-      <Users size={14} />
-      {summarizeRecipients(message.contactIds, contacts)}
-    </Typography>
-  </li>
-)
+    </li>
+  )
+}

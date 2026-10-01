@@ -1,3 +1,4 @@
+import type { Message, WithId } from '@broadcast/shared'
 import { Button, Skeleton, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { ChevronRight, MessageSquare, Plus, Users, X } from 'lucide-react'
 import { useState } from 'react'
@@ -5,13 +6,19 @@ import { Link } from 'react-router'
 import { EmptyState } from '../../components/EmptyState'
 import { FullScreenDialog } from '../../components/FullScreenDialog'
 import { LoadError } from '../../components/LoadError'
+import { useNow } from '../../lib/useNow'
 import { useCurrentUser } from '../auth/authContext'
 import { useConnectionContext } from '../connections/connectionContext'
+import { DeleteMessageDialog } from './DeleteMessageDialog'
+import { EditSentMessageDialog } from './EditSentMessageDialog'
 import { MessageCard } from './MessageCard'
 import { MessageComposer } from './MessageComposer'
 import { countMessages, filterMessages, type MessageFilter } from './messages'
 import { MessagesFilter } from './MessagesFilter'
 import { useMessages } from './messagesService'
+
+// Dialogs keep their target after closing so the exit animation does not flash empty content.
+type DialogState = { open: boolean; message?: WithId<Message> }
 
 const RULE = 'border-(--mui-palette-divider)'
 
@@ -27,6 +34,20 @@ export const BroadcastPage = () => {
   const isDesktop = useMediaQuery(useTheme().breakpoints.up('md'))
   const [filter, setFilter] = useState<MessageFilter>('all')
   const [composing, setComposing] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingText, setEditingText] = useState<DialogState>({ open: false })
+  const [deleting, setDeleting] = useState<DialogState>({ open: false })
+  const now = useNow()
+
+  // Read from the live list: if the message is sent or deleted meanwhile, the edit ends by itself.
+  const editing = messages.data.find((message) => message.id === editingId && message.status === 'scheduled')
+  const closeComposer = () => {
+    setComposing(false)
+    setEditingId(null)
+  }
+  const composer = (layout: 'panel' | 'screen') => (
+    <MessageComposer key={editing?.id ?? 'new'} layout={layout} editing={editing} onDone={closeComposer} />
+  )
 
   const visible = filterMessages(messages.data, filter)
   const hasMessages = messages.data.length > 0
@@ -58,7 +79,7 @@ export const BroadcastPage = () => {
   return (
     <div className="md:grid md:grid-cols-[460px_minmax(0,1fr)]">
       {isDesktop && (
-        <div className={`border-r-2 px-8 py-6 ${RULE}`}>{noContacts ? noRecipients : <MessageComposer layout="panel" />}</div>
+        <div className={`border-r-2 px-8 py-6 ${RULE}`}>{noContacts ? noRecipients : composer('panel')}</div>
       )}
 
       <section aria-label="Mensagens" className="flex min-w-0 flex-col">
@@ -113,7 +134,16 @@ export const BroadcastPage = () => {
         {visible.length > 0 && (
           <ul className="m-0 list-none p-0">
             {visible.map((message) => (
-              <MessageCard key={message.id} message={message} contacts={contacts.data} />
+              <MessageCard
+                key={message.id}
+                message={message}
+                contacts={contacts.data}
+                now={now}
+                editing={message.id === editing?.id}
+                onEdit={(target) => setEditingId(target.id)}
+                onEditText={(target) => setEditingText({ open: true, message: target })}
+                onDelete={(target) => setDeleting({ open: true, message: target })}
+              />
             ))}
           </ul>
         )}
@@ -136,16 +166,27 @@ export const BroadcastPage = () => {
             </Button>
           </div>
           <FullScreenDialog
-            open={composing}
-            title="Nova mensagem"
+            open={composing || Boolean(editing)}
+            title={editing ? 'Editar mensagem' : 'Nova mensagem'}
             closeIcon={<X size={22} />}
             closeLabel="Fechar"
-            onClose={() => setComposing(false)}
+            onClose={closeComposer}
           >
-            <MessageComposer layout="screen" onSent={() => setComposing(false)} />
+            {composer('screen')}
           </FullScreenDialog>
         </div>
       )}
+
+      <EditSentMessageDialog
+        open={editingText.open}
+        message={editingText.message}
+        onClose={() => setEditingText((current) => ({ ...current, open: false }))}
+      />
+      <DeleteMessageDialog
+        open={deleting.open}
+        message={deleting.message}
+        onClose={() => setDeleting((current) => ({ ...current, open: false }))}
+      />
     </div>
   )
 }
