@@ -14,19 +14,27 @@ export const signUp = async ({ name, email, password }: SignUpInput) => {
 
 export const signOut = () => firebaseSignOut(auth)
 
-const INVALID_CREDENTIALS = 'E-mail ou senha incorretos.'
+export type AuthError = { title: string; hint: string }
+
+const INVALID_CREDENTIALS: AuthError = {
+  title: 'E-mail ou senha incorretos.',
+  hint: 'Confira os dados e tente de novo.',
+}
 
 // Production (email enumeration protection) only returns invalid-credential; the emulator
 // still distinguishes wrong password from unknown user.
-const AUTH_ERRORS: Record<string, string> = {
+const AUTH_ERRORS: Record<string, AuthError> = {
   'auth/invalid-credential': INVALID_CREDENTIALS,
   'auth/wrong-password': INVALID_CREDENTIALS,
   'auth/user-not-found': INVALID_CREDENTIALS,
-  'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
-  'auth/weak-password': 'Senha muito fraca.',
-  'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
-  'auth/network-request-failed': 'Sem conexão. Verifique sua internet.',
+  'auth/too-many-requests': { title: 'Muitas tentativas.', hint: 'Aguarde alguns minutos e tente de novo.' },
+  'auth/network-request-failed': { title: 'Sem conexão.', hint: 'Verifique sua internet e tente de novo.' },
 }
 
-export const authErrorMessage = (error: unknown) =>
-  (error instanceof FirebaseError && AUTH_ERRORS[error.code]) || 'Não foi possível concluir. Tente novamente.'
+const UNEXPECTED: AuthError = { title: 'Não foi possível concluir.', hint: 'Tente de novo em instantes.' }
+
+export const describeAuthError = (error: unknown) =>
+  (error instanceof FirebaseError && AUTH_ERRORS[error.code]) || UNEXPECTED
+
+export const isEmailInUse = (error: unknown) =>
+  error instanceof FirebaseError && error.code === 'auth/email-already-in-use'

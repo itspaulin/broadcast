@@ -1,4 +1,5 @@
 import { TextField, type TextFieldProps } from '@mui/material'
+import { TriangleAlert } from 'lucide-react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 
 type Props<T extends FieldValues> = Omit<TextFieldProps, 'name'> & {
@@ -17,7 +18,16 @@ export const FormTextField = <T extends FieldValues>({ control, name, helperText
         {...field}
         inputRef={ref}
         error={Boolean(fieldState.error)}
-        helperText={fieldState.error?.message ?? helperText}
+        helperText={
+          fieldState.error ? (
+            <span className="flex items-center gap-1.5">
+              <TriangleAlert size={14} />
+              {fieldState.error.message}
+            </span>
+          ) : (
+            helperText
+          )
+        }
       />
     )}
   />
