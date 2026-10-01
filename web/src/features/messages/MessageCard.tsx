@@ -2,6 +2,7 @@ import { canEditMessage, editMinutesLeft, type Contact, type Message, type WithI
 import { Button, IconButton, Typography } from '@mui/material'
 import { Clock, Pencil, Trash2, Users } from 'lucide-react'
 import { capitalize, formatDuration, formatWhen } from '../../lib/format'
+import { DeliveryProgress } from './DeliveryProgress'
 import { messageMoment, summarizeRecipients } from './messages'
 import { MessageStatusChip } from './MessageStatusChip'
 
@@ -57,6 +58,7 @@ export const MessageCard = ({ message, contacts, now, editing, onEdit, onEditTex
         <Users size={14} />
         {summarizeRecipients(message.contactIds, contacts)}
       </Typography>
+      {!scheduled && <DeliveryProgress message={message} contacts={contacts} now={now} />}
       {!scheduled && canEditMessage(message, now) && (
         <div className="flex flex-wrap items-center gap-2.5">
           <Button

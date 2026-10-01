@@ -13,6 +13,8 @@ export const truncate = (text: string, max: number) =>
   text.length > max ? `${text.slice(0, max).trimEnd()}…` : text
 
 const time = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' })
+export const formatTime = (millis: number) => time.format(new Date(millis))
+
 const dayAndMonth = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' })
 const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 const DAY_MS = 24 * 60 * 60 * 1000
