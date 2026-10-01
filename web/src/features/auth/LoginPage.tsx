@@ -1,23 +1,30 @@
 import { signInInputSchema } from '@broadcast/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Link } from '@mui/material'
+import { Link } from '@mui/material'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link as RouterLink } from 'react-router'
 import { FormTextField } from '../../components/FormTextField'
+import { SubmitButton } from '../../components/SubmitButton'
+import { AuthErrorAlert } from './AuthErrorAlert'
 import { AuthLayout } from './AuthLayout'
-import { authErrorMessage, signIn } from './authService'
+import { describeAuthError, signIn, type AuthError } from './authService'
 
 export const LoginPage = () => {
-  const { control, handleSubmit, setError, formState } = useForm({
+  const [error, setError] = useState<AuthError | null>(null)
+  // onTouched: validate when leaving a field, never while the user is still typing in it.
+  const { control, handleSubmit, formState } = useForm({
     resolver: zodResolver(signInInputSchema),
     defaultValues: { email: '', password: '' },
+    mode: 'onTouched',
   })
 
   const onSubmit = handleSubmit(async (values) => {
+    setError(null)
     try {
       await signIn(values)
-    } catch (error) {
-      setError('root', { message: authErrorMessage(error) })
+    } catch (caught) {
+      setError(describeAuthError(caught))
     }
   })
 
@@ -26,20 +33,25 @@ export const LoginPage = () => {
       title="Entrar"
       footer={
         <>
-          Não tem conta?{' '}
+          Ainda não tem conta?{' '}
           <Link component={RouterLink} to="/signup">
-            Cadastre-se
+            Criar conta
           </Link>
         </>
       }
     >
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-        {formState.errors.root && <Alert severity="error">{formState.errors.root.message}</Alert>}
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+        {error && <AuthErrorAlert error={error} />}
         <FormTextField control={control} name="email" label="E-mail" type="email" autoComplete="email" autoFocus />
-        <FormTextField control={control} name="password" label="Senha" type="password" autoComplete="current-password" />
-        <Button type="submit" variant="contained" size="large" loading={formState.isSubmitting}>
-          Entrar
-        </Button>
+        <FormTextField
+          control={control}
+          name="password"
+          label="Senha"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Sua senha"
+        />
+        <SubmitButton submitting={formState.isSubmitting} label="Entrar" submittingLabel="Entrando…" />
       </form>
     </AuthLayout>
   )

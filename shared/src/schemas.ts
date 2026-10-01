@@ -34,7 +34,13 @@ export const signInInputSchema = z.object({
 export const signUpInputSchema = z.object({
   name,
   email,
-  password: z.string().min(PASSWORD_MIN_LENGTH, `A senha deve ter ao menos ${PASSWORD_MIN_LENGTH} caracteres`),
+  // Says how to fix it, not just that it is wrong.
+  password: z.string().min(PASSWORD_MIN_LENGTH, {
+    error: (issue) => {
+      const missing = PASSWORD_MIN_LENGTH - String(issue.input ?? '').length
+      return `A senha precisa ter pelo menos ${PASSWORD_MIN_LENGTH} caracteres (${missing === 1 ? 'falta 1' : `faltam ${missing}`}).`
+    },
+  }),
 })
 
 export const connectionInputSchema = z.object({ name })
