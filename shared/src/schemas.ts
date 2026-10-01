@@ -5,10 +5,19 @@ const id = z.string({ error: 'Identificador inválido' }).min(1, 'Identificador 
 
 const name = z.string().trim().min(1, 'Informe o nome').max(NAME_MAX_LENGTH)
 
+// Brazilian numbers only: accepts any mask, stores E.164 (+55DDDNUMBER).
 const phone = z
   .string()
   .transform((value) => value.replace(/\D/g, ''))
-  .pipe(z.string().regex(/^(55)?\d{10,11}$/, 'Telefone inválido'))
+  .pipe(
+    z.string().regex(/^(55)?\d{10,11}$/, {
+      // 8 or 9 digits is a complete local number missing its area code.
+      error: (issue) =>
+        /^\d{8,9}$/.test(String(issue.input))
+          ? 'Falta o DDD. Ex.: (11) 3322-4455'
+          : 'Telefone inválido. Use DDD e número, como (11) 98765-4321',
+    }),
+  )
   .transform((digits) => `+${digits.length >= 12 ? digits : `55${digits}`}`)
 
 const body = z

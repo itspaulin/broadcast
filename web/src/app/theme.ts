@@ -82,6 +82,10 @@ export const theme = createTheme(
             style: { '&:active': { backgroundColor: accent[700] } },
           },
           {
+            props: { variant: 'contained', color: 'error' },
+            style: { '&.Mui-disabled': { backgroundColor: accent[700], color: ground, opacity: 0.45 } },
+          },
+          {
             props: { variant: 'outlined', color: 'inherit' },
             style: { borderColor: divider, '&:hover': { borderColor: divider, backgroundColor: inkTint(7) } },
           },
@@ -107,7 +111,37 @@ export const theme = createTheme(
         },
       },
       MuiListItemIcon: { styleOverrides: { root: { minWidth: 0, color: 'inherit' } } },
-      MuiDialog: { styleOverrides: { paper: { boxShadow: shadow.lg } } },
+      // The paper carries the padding and scrolls; title, content and actions are plain blocks,
+      // so focus rings inside the content are not clipped.
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            boxShadow: shadow.lg,
+            padding: 24,
+            gap: 16,
+            margin: 16,
+            width: 'calc(100% - 32px)',
+            '& .MuiOutlinedInput-root': { backgroundColor: ground },
+          },
+        },
+      },
+      MuiDialogTitle: { styleOverrides: { root: { padding: 0, fontSize: 20, fontWeight: 800, lineHeight: 1.2 } } },
+      MuiDialogContent: { styleOverrides: { root: { padding: 0, overflowY: 'visible' } } },
+      MuiDialogActions: {
+        styleOverrides: {
+          root: {
+            padding: 0,
+            marginTop: 8,
+            // On phones the actions stack full-width with the confirming one on top.
+            '@media (max-width:599px)': {
+              flexDirection: 'column-reverse',
+              alignItems: 'stretch',
+              '& > .MuiButton-root': { minHeight: 48, marginLeft: 0 },
+              '& > .MuiButton-root + .MuiButton-root': { marginBottom: 8 },
+            },
+          },
+        },
+      },
       MuiBackdrop: {
         styleOverrides: { root: { '&:not(.MuiBackdrop-invisible)': { backgroundColor: `${neutral[900]}80` } } },
       },

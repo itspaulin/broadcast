@@ -1,7 +1,7 @@
 import { contactInputSchema, type Contact, type WithId } from '@broadcast/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import { useForm } from 'react-hook-form'
+import { FormDialog } from '../../components/FormDialog'
 import { FormTextField } from '../../components/FormTextField'
 import { formatPhone } from '../../lib/format'
 import { useCurrentUser } from '../auth/authContext'
@@ -22,6 +22,7 @@ export const ContactDialog = ({ open, onClose, contact, initialName = '' }: Prop
   const { control, handleSubmit, setError, formState, reset } = useForm({
     resolver: zodResolver(contactInputSchema),
     values: { name: contact?.name ?? initialName, phone: contact ? formatPhone(contact.phone) : '' },
+    mode: 'onTouched',
   })
 
   const close = () => {
@@ -40,29 +41,25 @@ export const ContactDialog = ({ open, onClose, contact, initialName = '' }: Prop
   })
 
   return (
-    <Dialog open={open} onClose={close} fullWidth maxWidth="xs">
-      <form onSubmit={onSubmit} noValidate>
-        <DialogTitle>{contact ? 'Editar contato' : 'Novo contato'}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
-          {formState.errors.root && <Alert severity="error">{formState.errors.root.message}</Alert>}
-          <FormTextField control={control} name="name" label="Nome" autoFocus margin="dense" />
-          <FormTextField
-            control={control}
-            name="phone"
-            label="Telefone"
-            type="tel"
-            autoComplete="tel"
-            placeholder="(11) 99999-9999"
-            helperText="Com DDD. Apenas números do Brasil."
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={close}>Cancelar</Button>
-          <Button type="submit" variant="contained" loading={formState.isSubmitting}>
-            Salvar
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+    <FormDialog
+      open={open}
+      title={contact ? 'Editar contato' : 'Novo contato'}
+      submitLabel="Salvar contato"
+      submitting={formState.isSubmitting}
+      error={formState.errors.root?.message}
+      onSubmit={onSubmit}
+      onClose={close}
+    >
+      <FormTextField control={control} name="name" label="Nome" autoFocus />
+      <FormTextField
+        control={control}
+        name="phone"
+        label="Telefone"
+        type="tel"
+        autoComplete="tel"
+        placeholder="(11) 99999-9999"
+        helperText="Com DDD, apenas números do Brasil. Pode digitar com ou sem máscara."
+      />
+    </FormDialog>
   )
 }

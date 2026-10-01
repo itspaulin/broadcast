@@ -1,8 +1,8 @@
 import { connectionInputSchema, type Connection, type WithId } from '@broadcast/shared'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
+import { FormDialog } from '../../components/FormDialog'
 import { FormTextField } from '../../components/FormTextField'
 import { useCurrentUser } from '../auth/authContext'
 import { createConnection, renameConnection } from './connectionsService'
@@ -43,20 +43,22 @@ export const ConnectionDialog = ({ open, onClose, connection, onCreated }: Props
   })
 
   return (
-    <Dialog open={open} onClose={close} fullWidth maxWidth="xs">
-      <form onSubmit={onSubmit} noValidate>
-        <DialogTitle>{connection ? 'Renomear conexão' : 'Nova conexão'}</DialogTitle>
-        <DialogContent className="flex flex-col gap-4">
-          {formState.errors.root && <Alert severity="error">{formState.errors.root.message}</Alert>}
-          <FormTextField control={control} name="name" label="Nome" autoFocus margin="dense" />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={close}>Cancelar</Button>
-          <Button type="submit" variant="contained" loading={formState.isSubmitting}>
-            Salvar
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
+    <FormDialog
+      open={open}
+      title={connection ? 'Renomear conexão' : 'Nova conexão'}
+      submitLabel={connection ? 'Salvar nome' : 'Criar conexão'}
+      submitting={formState.isSubmitting}
+      error={formState.errors.root?.message}
+      onSubmit={onSubmit}
+      onClose={close}
+    >
+      <FormTextField
+        control={control}
+        name="name"
+        label="Nome da conexão"
+        autoFocus
+        helperText='Ex.: o nome da unidade ou do canal, como "Delivery".'
+      />
+    </FormDialog>
   )
 }
