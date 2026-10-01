@@ -20,6 +20,9 @@ import { useMessages } from './messagesService'
 // Dialogs keep their target after closing so the exit animation does not flash empty content.
 type DialogState = { open: boolean; message?: WithId<Message> }
 
+// Recipient statuses move within seconds of sending, so the page clock ticks faster than the default.
+const CLOCK_INTERVAL_MS = 5 * 1000
+
 const RULE = 'border-(--mui-palette-divider)'
 
 const EMPTY_FILTER: Record<Exclude<MessageFilter, 'all'>, string> = {
@@ -37,7 +40,7 @@ export const BroadcastPage = () => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState<DialogState>({ open: false })
   const [deleting, setDeleting] = useState<DialogState>({ open: false })
-  const now = useNow()
+  const now = useNow(CLOCK_INTERVAL_MS)
 
   // Read from the live list: if the message is sent or deleted meanwhile, the edit ends by itself.
   const editing = messages.data.find((message) => message.id === editingId && message.status === 'scheduled')

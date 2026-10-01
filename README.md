@@ -43,6 +43,11 @@ Requer o plano **Blaze** do Firebase.
 
 Detalhes do ciclo de vida das mensagens e alternativas: [ADR 0002](docs/decisions/0002-ciclo-de-vida-das-mensagens.md).
 
+## Status por destinatário
+
+O envio é simulado, então o progresso de cada destinatário (enviado → entregue → lido) é calculado de forma determinística a partir do horário de envio e dos ids da mensagem e do contato, sem escritas no banco.
+Qualquer dispositivo mostra o mesmo resultado. Detalhes: [ADR 0003](docs/decisions/0003-status-por-destinatario-simulado.md).
+
 ## Rodando localmente
 
 Pré-requisitos: Node 22+ e JDK 21+ (exigido pelos emuladores do Firebase). A Firebase CLI vem como dependência do projeto.
