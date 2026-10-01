@@ -13,5 +13,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["rules", "vitest.config.ts"]
+  "include": ["rules", "functions", "vitest.config.ts"]
 }

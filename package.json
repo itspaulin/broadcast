@@ -13,7 +13,8 @@
     "dev": "npm run build -w functions && concurrently -k -n functions,emulators,web -c blue,magenta,green \"npm run build:watch -w functions\" \"npm run emulators\" \"npm run dev -w web\"",
     "lint": "oxlint --deny-warnings",
     "build": "npm run build --workspaces --if-present",
-    "test:rules": "npm run test:rules -w tests"
+    "test:rules": "npm run test:rules -w tests",
+    "test:functions": "npm run test:functions -w tests"
   },
   "devDependencies": {
     "concurrently": "^10.0.5",

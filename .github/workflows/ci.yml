@@ -43,3 +43,23 @@ jobs:
           key: firebase-emulators-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - run: npm run test:rules
+
+  functions:
+    name: Functions tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulators-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - run: npm run test:functions
