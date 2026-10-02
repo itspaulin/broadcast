@@ -6,6 +6,8 @@ Aplicação SaaS multi-tenant de Broadcast (teste prático — Desenvolvedor Ful
 Cada usuário cadastrado é um cliente, com suas próprias conexões, contatos e mensagens.
 O envio de mensagens é simulado; mensagens agendadas passam para **Enviada** automaticamente via Cloud Functions.
 
+**Aplicação publicada:** https://broadcast-paulofilho.web.app (use as [contas de demonstração](#contas-de-demonstração) ou crie uma conta)
+
 ## Funcionalidades
 
 - **Autenticação**: cadastro e login com e-mail e senha.
@@ -149,7 +151,7 @@ npx firebase login
 npx firebase deploy
 ```
 
-O deploy publica as Security Rules, os índices, as functions e o front (Hosting), fazendo o build de cada parte antes.
+O deploy publica as Security Rules, os índices, as functions e o front (Hosting), fazendo o build de cada parte antes. O build de produção do front usa `web/.env.production`, que desliga os emuladores mesmo que `web/.env` os ligue.
 
 ## Limitações e escala
 
